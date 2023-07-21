@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @db.Uuid
+  username        String    @unique @db.VarChar(255)
+  email           String    @unique @db.VarChar(255)
+  name            String    @db.VarChar(255)
+  password        String?   @db.VarChar(255)
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+
+  audits       Audit[]
+  posts        Post[]
+  accessTokens AccessToken[]
+
+  @@map("users")
+}
+
+model Audit {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  action    String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audits")
+}
+
+model Post {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  title     String    @db.VarChar(255)
+  resume    String    @db.VarChar(255)
+  content   Json      @db.Json
+  imageUrl  String?   @map("image_url") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("posts")
+}
+
+model AccessToken {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  scope     String    @db.VarChar(255)
+  userIP    String?   @map("user_ip") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("access_tokens")
+}

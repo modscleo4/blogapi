@@ -1,0 +1,498 @@
+openapi: 3.0.0
+info:
+  description: "Backend API for Blogs project."
+  version: 1.0.0
+  title: Blogs API
+  contact:
+    email: modscleo4@modscleo4.dev.br
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://blogs.modscleo4.dev.br/api
+    description: Production server
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestUser'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '409':
+          description: Username or email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /auth/user:
+    get:
+      tags:
+        - Auth
+      summary: Get current user
+      security:
+        - oauth2: []
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /post:
+    get:
+      tags:
+        - Post
+      summary: Get all posts
+      responses:
+        '200':
+          description: Posts found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    post:
+      tags:
+        - Post
+      summary: Create a new post
+      security:
+        - oauth2: ['write:posts']
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPost'
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /post/{id}:
+    get:
+      tags:
+        - Post
+      summary: Get a post by ID
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    put:
+      tags:
+        - Post
+      summary: Update a post by ID
+      security:
+        - oauth2: ['write:posts']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPost'
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    patch:
+      tags:
+        - Post
+      summary: Partially update a post by ID
+      security:
+        - oauth2: ['write:posts']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPost'
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    delete:
+      tags:
+        - Post
+      summary: Delete a post by ID
+      security:
+        - oauth2: ['delete:posts']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Post deleted
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      description: OAuth2 password flow
+      flows:
+        password:
+          tokenUrl: /oauth/token
+          scopes:
+            write:posts: Write posts
+            delete:posts: Delete posts
+            write:comments: Write comments
+            delete:comments: Delete comments
+  schemas:
+    ServerErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Internal server error
+        stack:
+          type: array
+          description: Error stack
+          items:
+            type: object
+            properties:
+              method:
+                type: string
+                description: Method name
+                example: AppController.index
+              file:
+                type: string
+                description: File name
+                example: AppController.ts
+              line:
+                type: integer
+                description: Line number
+                example: 10
+              column:
+                type: integer
+                description: Column number
+                example: 10
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Validation failed
+        error:
+          type: string
+          description: Single validation error (if it's not related to a field)
+          example: Invalid body
+        errors:
+          type: object
+          description: Validation errors
+          example: { "username": ["This field is required"], "password": ["This field is required"] }
+          properties:
+            [key]:
+              type: array
+              items:
+                type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Invalid request
+    RequestUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User's username
+          example: myusername
+        email:
+          type: string
+          description: User's email
+          example: username@example.com
+        name:
+          type: string
+          description: User's name
+          example: My Name
+        password:
+          type: string
+          description: User's password
+          example: 12345678
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          description: User's username
+          example: myusername
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          description: User's username
+          example: myusername
+        email:
+          type: string
+          description: User's email
+          example: username@example.com
+        name:
+          type: string
+          description: User's name
+          example: My Name
+        emailVerifiedAt:
+          type: string
+          format: date-time
+          description: User's email verification date
+          example: "2021-01-01T00:00:00.000Z"
+        createdAt:
+          type: string
+          format: date-time
+          description: User's creation date
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: User's last update date
+          example: "2021-01-01T00:00:00.000Z"
+    RequestPost:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Post's title
+          example: My Post
+        resume:
+          type: string
+          description: Post's resume
+          example: My post resume
+        content:
+          type: object
+          description: Post's content
+          example: { "body": "My post content" }
+        imageUrl:
+          type: string
+          description: Post's image URL
+          example: https://example.com/image.png
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Post's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type: string
+          description: Post's title
+          example: My Post
+        resume:
+          type: string
+          description: Post's resume
+          example: My post resume
+        content:
+          type: object
+          description: Post's content
+          example: { "body": "My post content" }
+        imageUrl:
+          type: string
+          description: Post's image URL
+          example: https://example.com/image.png
+        createdAt:
+          type: string
+          format: date-time
+          description: Post's creation date
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Post's last update date
+          example: "2021-01-01T00:00:00.000Z"

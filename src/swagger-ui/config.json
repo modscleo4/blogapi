@@ -1,0 +1,15 @@
+{
+    "$schema": "http://swagger.io/v2/schema.json#",
+    "info": {
+        "description": "Sample project using Midori.js framework.",
+        "version": "1.0.0",
+        "title": "Midori HTTP Bin",
+        "contact": {
+            "email": "modscleo4@modscleo4.dev.br"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    }
+}

@@ -1,0 +1,49 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "NodeNext",
+        "module": "ESNext",
+        "target": "ESNext",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "strict": true,
+        "alwaysStrict": true,
+        "pretty": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "skipLibCheck": true,
+        "paths": {
+            "@app/*": [
+                "./src/app/*"
+            ],
+            "@core/*": [
+                "./src/core/*"
+            ],
+            "@swagger-ui/*": [
+                "./src/swagger-ui/*"
+            ],
+        },
+        "plugins": [
+            {
+                "transform": "typescript-transform-paths",
+                "exclude": [
+                    "**/node_modules/**"
+                ]
+            },
+            {
+                "transform": "typescript-transform-paths",
+                "exclude": [
+                    "**/node_modules/**"
+                ],
+                "afterDeclarations": true
+            }
+        ]
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}
