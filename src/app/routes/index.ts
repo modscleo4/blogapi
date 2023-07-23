@@ -58,15 +58,17 @@ Router.post('/oauth/token', Oauth2Handler).withName('oauth.token');
 Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');
 
-Router.group('/post', () => {
-    Router.get('/', PostHandler.List).withName('post.list');
-    Router.post('/', PostHandler.Create, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
+Router.group('/api/v1', () => {
+    Router.group('/post', () => {
+        Router.get('/', PostHandler.List).withName('post.list');
+        Router.post('/', PostHandler.Create, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
 
-    Router.group('/{id}', () => {
-        Router.get('/', PostHandler.Show).withName('post.show');
-        Router.put('/', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
-        Router.patch('/', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
-        Router.delete('/', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
+        Router.group('/{id}', () => {
+            Router.get('/', PostHandler.Show).withName('post.show');
+            Router.put('/', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
+            Router.patch('/', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
+            Router.delete('/', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
+        });
     });
 });
 

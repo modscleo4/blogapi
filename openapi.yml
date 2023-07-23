@@ -11,7 +11,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Development server
-  - url: https://blogs.modscleo4.dev.br/api
+  - url: https://api.blogs.modscleo4.dev.br
     description: Production server
 paths:
   /auth/register:
@@ -76,7 +76,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /post:
+  /api/v1/post:
     get:
       tags:
         - Post
@@ -133,7 +133,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /post/{id}:
+  /api/v1/post/{id}:
     get:
       tags:
         - Post
