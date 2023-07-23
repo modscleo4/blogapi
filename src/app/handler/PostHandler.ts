@@ -26,7 +26,7 @@ import PostDAO from "@core/dao/PostDAO.js";
 
 export class List extends Handler {
     async handle(req: Request): Promise<Response> {
-        const data = await PostDAO.all();
+        const data = await PostDAO.all({ include: { user: { select: { username: true } } } });
 
         return Response.json(data);
     }

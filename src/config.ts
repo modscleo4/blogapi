@@ -23,12 +23,12 @@ export default function config(server: Server): void {
     // Recover the config with app.config.get(ConfigProvider) in your handlers and middleware constructors
 
     server.configure(CORSConfigProviderFactory({
-        origin: '*',
+        origin: process.env.CORS_ORIGIN || '*',
         methods: '*',
         headers: '*',
         maxAge: 86400,
         openerPolicy: 'same-origin',
-        embedderPolicy: 'require-corp'
+        embedderPolicy: 'unsafe-none'
     }));
 
     server.configure(ErrorConfigProviderFactory({
@@ -45,7 +45,8 @@ export default function config(server: Server): void {
             alg: process.env.JWE_ALGORITHM || 'RSA-OAEP-256',
             enc: process.env.JWE_ENCRYPTION || 'A256GCM',
             secret: process.env.JWE_SECRET,
-            privateKeyFile: process.env.JWE_PRIVATE_KEY
+            privateKeyFile: process.env.JWE_PRIVATE_KEY,
+            // ephemeralPrivateKeyFile: process.env.JWE_EPHEMERAL_KEY,
         }
     }));
 

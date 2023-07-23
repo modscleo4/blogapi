@@ -25,6 +25,8 @@ import { generateUUID } from "midori/util/uuid.js";
 
 import UserDAO from "@core/dao/UserDAO.js";
 import ValidationError from "@app/errors/ValidationError.js";
+import AuthBearerService from "@app/services/AuthBearerService.js";
+import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
 type EmailVerificationPayload = {
     email: string;
@@ -150,8 +152,10 @@ export class User extends Handler {
 
     async handle(req: Request): Promise<Response> {
         // Since the AuthBearer middleware is used, the user is already authenticated
-        const user = this.#auth.user(req)!;
+        const authUser = this.#auth.user(req)!;
 
-        return Response.json({ user, jwt: req.container.get('jwt') });
+        const user = (await UserDAO.get({ select: { id: true, username: true, email: true, name: true }, where: { id: authUser.id } }))!;
+
+        return Response.json(user);
     }
 }

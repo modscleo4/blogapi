@@ -29,6 +29,7 @@ import {
 
 import PrismaUserService from "@app/services/PrismaUserService.js";
 import router from '@app/routes/index.js';
+import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
 export default function providers(server: Server): void {
     server.install(RouterServiceProviderFactory(router));
@@ -40,4 +41,5 @@ export default function providers(server: Server): void {
     server.install(HashServiceProviderFactory(new Scrypt()));
     server.install(UserServiceProviderFactory(new PrismaUserService(server.services.get(HashServiceProvider))));
     server.install(AuthServiceProvider);
+    server.install(AuthBearerServiceProvider);
 }

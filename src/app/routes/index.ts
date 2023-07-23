@@ -16,6 +16,7 @@
 
 import { Router as RouterBuilder } from "midori/router";
 import { Response } from "midori/http";
+import { CORSMiddleware } from "midori/middlewares";
 
 import Oauth2Handler from "@app/handler/Oauth2Handler.js";
 import * as PostHandler from "@app/handler/PostHandler.js";
@@ -54,7 +55,7 @@ Router.get('/auth/verify', AuthHandler.VerifyEmail).withName('auth.verify');
 Router.get('/auth/user', AuthHandler.User, [AuthBearerMiddleware]).withName('auth.user');
 
 Router.post('/oauth/token', Oauth2Handler).withName('oauth.token');
-Router.post('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
+Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');
 
 Router.group('/post', () => {

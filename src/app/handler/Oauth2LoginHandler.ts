@@ -26,6 +26,8 @@ import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
 import UserDAO from "@core/dao/UserDAO.js";
 
 import { Oauth2LoginConfig, Oauth2LoginConfigProvider } from "@app/providers/Oauth2LoginConfigProvider.js";
+import AuthBearerService from "@app/services/AuthBearerService.js";
+import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
 export class Login extends Handler {
     #config?: Oauth2LoginConfig;
@@ -57,15 +59,17 @@ export class Login extends Handler {
 export class Callback extends Handler {
     #config?: Oauth2LoginConfig;
     #jwt: JWT;
+    #authBearer: AuthBearerService;
 
     constructor(app: Application) {
         super(app);
 
         this.#config = app.config.get(Oauth2LoginConfigProvider);
         this.#jwt = app.services.get(JWTServiceProvider);
+        this.#authBearer = app.services.get(AuthBearerServiceProvider);
     }
 
-    async handle(req: Request<{ code: string, redirect_uri: string; }>): Promise<Response> {
+    async handle(req: Request<{ code: string; }>): Promise<Response> {
         if (!this.#config) {
             throw new HTTPError('Oauth2 config not found', EStatusCode.INTERNAL_SERVER_ERROR);
         }
@@ -77,8 +81,9 @@ export class Callback extends Handler {
                 'Authorization': 'Basic ' + btoa(this.#config.clientId + ':' + this.#config.clientSecret)
             },
             body: new URLSearchParams({
-                code: req.parsedBody!.code,
                 grant_type: 'authorization_code',
+                code: req.parsedBody!.code,
+                redirect_uri: this.#config.redirectUri,
             })
         });
 
@@ -100,43 +105,15 @@ export class Callback extends Handler {
 
         const { email, name, preferred_username } = await userinfoRes.json();
 
-        let user = await UserDAO.get({ where: { email } });
-        if (!user) {
-            user = await UserDAO.create({
-                id: generateUUID(),
-                username: preferred_username,
-                email,
-                name,
-            });
-        }
+        const user = await UserDAO.get({ where: { email } }) ?? await UserDAO.create({
+            id: generateUUID(),
+            username: preferred_username,
+            email,
+            name,
+        });
 
-        const scope = "*";
-        const issuedAt = Date.now();
-        const expires = 1000 * 60 * 60 * 24 * 30; // 30 days
+        const tokenInfo = await this.#authBearer.generateToken(user, '*', req);
 
-        const data: (JWTPayload & { username: string; scope: string; }) = {
-            iss: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
-            aud: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
-            sub: user.id,
-            exp: Math.ceil((issuedAt + expires) / 1000),
-            iat: Math.floor(issuedAt / 1000),
-            jti: generateUUID(),
-
-            username: user.username,
-            scope,
-        };
-
-        const access_token = this.#jwt.sign(data);
-        const refresh_token = this.#jwt.encrypt(Buffer.from(JSON.stringify(<JWTPayload> { jti: generateUUID(), sub: data.jti })), 'JWT');
-
-        await AccessTokenDAO.create({ id: data.jti!, user: { connect: { id: user.id } }, scope, expiresAt: new Date(issuedAt + expires), userIP: req.ip });
-
-        return Response.json({
-            token_type: 'Bearer',
-            access_token,
-            refresh_token,
-            expires_in: expires / 1000,
-            scope,
-        }).withStatus(EStatusCode.CREATED);
+        return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }
 }

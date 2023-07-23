@@ -25,16 +25,20 @@ import { AuthServiceProvider, JWTServiceProvider } from "midori/providers";
 
 import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
 import UserDAO from "@core/dao/UserDAO.js";
+import AuthBearerService from "@app/services/AuthBearerService.js";
+import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
 export default class Oauth2Handler extends Handler {
     #jwt: JWT;
     #auth: Auth;
+    #authBearer: AuthBearerService;
 
     constructor(app: Application) {
         super(app);
 
         this.#jwt = app.services.get(JWTServiceProvider);
         this.#auth = app.services.get(AuthServiceProvider);
+        this.#authBearer = app.services.get(AuthBearerServiceProvider);
     }
 
     async handlePasswordGrant(req: Request<{ grant_type: string, username: string, password: string, scope?: string; }>): Promise<Response> {
@@ -47,33 +51,9 @@ export default class Oauth2Handler extends Handler {
             throw new HTTPError("Wrong username or password.", EStatusCode.BAD_REQUEST);
         }
 
-        const scope = req.parsedBody.scope || "";
-        const issuedAt = Date.now();
-        const expires = 1000 * 60 * 60 * 1; // 1 hour
+        const tokenInfo = await this.#authBearer.generateToken(user, req.parsedBody.scope || '*', req);
 
-        const data: (Payload & { username: string; scope: string; }) = {
-            iss: "http://localhost:3000",
-            sub: user.id,
-            exp: Math.ceil((issuedAt + expires) / 1000),
-            iat: Math.floor(issuedAt / 1000),
-            jti: generateUUID(),
-
-            username: user.username,
-            scope,
-        };
-
-        const access_token = this.#jwt.sign(data);
-        const refresh_token = this.#jwt.encrypt(Buffer.from(JSON.stringify(<Payload> { jti: generateUUID(), sub: data.jti })), 'JWT');
-
-        await AccessTokenDAO.create({ id: data.jti!, user: { connect: { id: user.id } }, scope, expiresAt: new Date(issuedAt + expires), userIP: req.ip });
-
-        return Response.json({
-            access_token,
-            refresh_token,
-            expires_in: expires / 1000,
-            token_type: 'Bearer',
-            scope,
-        }).withStatus(EStatusCode.CREATED);
+        return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }
 
     async handleRefreshTokenGrant(req: Request<{ grant_type: string, refresh_token: string }>): Promise<Response> {
@@ -98,34 +78,11 @@ export default class Oauth2Handler extends Handler {
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
-        const scope = accessToken.scope;
-        const issuedAt = Date.now();
-        const expires = 1000 * 60 * 60 * 1; // 1 hour
+        const tokenInfo = await this.#authBearer.generateToken(user, accessToken.scope, req);
 
-        const data: (Payload & { username: string; scope: string; }) = {
-            iss: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
-            aud: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
-            sub: user.id,
-            exp: Math.ceil((issuedAt + expires) / 1000),
-            iat: Math.floor(issuedAt / 1000),
-            jti: generateUUID(),
+        await AccessTokenDAO.save(payload.sub!, { revokedAt: new Date() });
 
-            username: user.username,
-            scope: accessToken.scope,
-        };
-
-        const access_token = this.#jwt.sign(data);
-        const refresh_token = this.#jwt.encrypt(Buffer.from(JSON.stringify(<Payload> { jti: generateUUID(), sub: data.jti })), 'JWT');
-
-        await AccessTokenDAO.save(payload.sub!, { revokedAt: new Date(), userIP: req.ip });
-
-        return Response.json({
-            access_token,
-            refresh_token,
-            expires_in: expires / 1000,
-            token_type: 'Bearer',
-            scope,
-        }).withStatus(EStatusCode.CREATED);
+        return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }
 
     async handle(req: Request<{ grant_type: string; }>): Promise<Response> {

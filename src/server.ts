@@ -23,7 +23,6 @@ import { prisma } from "@core/lib/Prisma.js";
 import config from './config.js';
 import pipeline from "./pipeline.js";
 import providers from "./providers.js";
-import { Scrypt } from 'midori/hash';
 
 dotenv.config({ });
 

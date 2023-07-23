@@ -33,7 +33,7 @@ export default class PrismaUserService extends UserService {
     }
 
     async getUserByCredentials(username: string, password: string): Promise<User | null> {
-        const user = await UserDAO.get({ select: { id: true, username: true, password: true }, where: { username } });
+        const user = await UserDAO.get({ select: { id: true, username: true, password: true }, where: { OR: [{ username }, { email: username }] } });
 
         if (!user) {
             return null;
