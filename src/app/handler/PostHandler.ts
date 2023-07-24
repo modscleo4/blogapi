@@ -26,7 +26,7 @@ import PostDAO from "@core/dao/PostDAO.js";
 
 export class List extends Handler {
     async handle(req: Request): Promise<Response> {
-        const data = await PostDAO.all({ include: { user: { select: { username: true } } } });
+        const data = await PostDAO.all({ include: { user: { select: { username: true } } }, orderBy: { createdAt: 'desc' } });
 
         return Response.json(data);
     }
@@ -41,7 +41,7 @@ export class Create extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl?: string | null }>): Promise<Response> {
+    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
         if (!req.parsedBody) {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
@@ -81,7 +81,8 @@ export class Show extends Handler {
         const post = await PostDAO.get({
             where: {
                 id
-            }
+            },
+            include: { user: { select: { username: true } } }
         });
 
         if (!post) {
@@ -101,7 +102,7 @@ export class Update extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl: string | null }>): Promise<Response> {
+    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl: string | null; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !id.match(/^[0-9a-f]{8}(-[0-9a-f]{4}){4}[0-9a-f]{8}$/i)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);

@@ -37,13 +37,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '409':
           description: Username or email already in use
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ValidationErrorsResponse'
         '500':
           description: Internal server error
           content:
@@ -63,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthUser'
+                $ref: '#/components/schemas/User'
         '401':
           description: Unauthorized
           content:
@@ -120,7 +122,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
@@ -157,7 +161,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '404':
           description: Post not found
           content:
@@ -201,7 +207,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
@@ -251,7 +259,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
@@ -291,7 +301,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
@@ -364,6 +376,13 @@ components:
           type: string
           description: Single validation error (if it's not related to a field)
           example: Invalid body
+    ValidationErrorsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Validation failed
         errors:
           type: object
           description: Validation errors
@@ -399,17 +418,6 @@ components:
           type: string
           description: User's password
           example: 12345678
-    AuthUser:
-      type: object
-      properties:
-        id:
-          type: string
-          description: User's UUID
-          example: 123e4567-e89b-12d3-a456-426614174000
-        username:
-          type: string
-          description: User's username
-          example: myusername
     User:
       type: object
       properties:
@@ -429,21 +437,6 @@ components:
           type: string
           description: User's name
           example: My Name
-        emailVerifiedAt:
-          type: string
-          format: date-time
-          description: User's email verification date
-          example: "2021-01-01T00:00:00.000Z"
-        createdAt:
-          type: string
-          format: date-time
-          description: User's creation date
-          example: "2021-01-01T00:00:00.000Z"
-        updatedAt:
-          type: string
-          format: date-time
-          description: User's last update date
-          example: "2021-01-01T00:00:00.000Z"
     RequestPost:
       type: object
       properties:
@@ -469,6 +462,10 @@ components:
         id:
           type: string
           description: Post's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          description: Post's user UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         title:
           type: string
@@ -496,3 +493,11 @@ components:
           format: date-time
           description: Post's last update date
           example: "2021-01-01T00:00:00.000Z"
+        user:
+          type: object
+          description: Post's user
+          properties:
+            username:
+              type: string
+              description: User's username
+              example: myusername

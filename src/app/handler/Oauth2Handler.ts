@@ -61,20 +61,23 @@ export default class Oauth2Handler extends Handler {
             throw new HTTPError("Invalid request.", EStatusCode.BAD_REQUEST);
         }
 
-        const jwsData = this.#jwt.decrypt(req.parsedBody.refresh_token);
-        if (!jwsData) {
+        const jweData = this.#jwt.decrypt(req.parsedBody.refresh_token);
+        if (!jweData) {
+            console.log(0);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
-        const payload = JSON.parse(jwsData.toString()) as Payload;
+        const payload = JSON.parse(jweData.toString()) as Payload;
 
         const accessToken = await AccessTokenDAO.get({ where: { id: payload.sub } });
-        if (!accessToken || accessToken.expiresAt < new Date() || accessToken.revokedAt) {
+        if (!accessToken || accessToken.revokedAt || (payload.exp && payload.exp < Date.now() / 1000)) {
+            console.log(1);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
         const user = await UserDAO.get({ where: { id: accessToken.userId } });
         if (!user) {
+            console.log(2);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 

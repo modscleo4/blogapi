@@ -33,7 +33,7 @@ export default class AuthBearerService {
 
     async generateToken(user: User, scope: string, req: Request): Promise<{ token_type: 'Bearer'; access_token: string; refresh_token: string; expires_in: number; scope: string; }> {
         const issuedAt = Date.now();
-        const expires = 1000 * 60 * 60 * 1; // 1 hour
+        const expires = 1000 * 60 * 10; // 10 minutes
 
         const data: (JWTPayload & { username: string; scope: string; }) = {
             iss: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
