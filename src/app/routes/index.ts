@@ -19,8 +19,9 @@ import { Response } from "midori/http";
 import { CORSMiddleware } from "midori/middlewares";
 
 import Oauth2Handler from "@app/handler/Oauth2Handler.js";
-import * as PostHandler from "@app/handler/PostHandler.js";
 import * as AuthHandler from "@app/handler/AuthHandler.js";
+import * as PostHandler from "@app/handler/PostHandler.js";
+import * as VoteHandler from "@app/handler/VoteHandler.js";
 
 import AuthBearerMiddleware from "@app/middleware/AuthBearerMiddleware.js";
 import PostCreateValidationMiddleware from "@app/middleware/validations/PostCreateValidationMiddleware.js";
@@ -32,8 +33,10 @@ import AuthRegisterValidationMiddleware from "@app/middleware/validations/AuthRe
 import OauthScopeMiddlewareFactory from "@app/middleware/OauthScopeMiddleware.js";
 
 import addSwaggerRoutes from "@swagger-ui/swagger.router.js";
+import PostVoteValidationMiddleware from "@app/middleware/validations/PostVoteValidationMiddleware.js";
 
 const OauthScopeWritePostsMiddleware = OauthScopeMiddlewareFactory({ scopes: ['write:posts'] });
+const OauthScopeVotePostsMiddleware = OauthScopeMiddlewareFactory({ scopes: ['vote:posts'] });
 const OauthScopeDeletePostsMiddleware = OauthScopeMiddlewareFactory({ scopes: ['delete:posts'] });
 
 const Router = new RouterBuilder();
@@ -68,6 +71,12 @@ Router.group('/api/v1', () => {
             Router.put('/', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
             Router.patch('/', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
             Router.delete('/', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
+
+            Router.group('/vote', () => {
+                Router.get('/', VoteHandler.Show, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.show');
+                Router.put('/', VoteHandler.Update, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware, PostVoteValidationMiddleware]).withName('post.vote.update');
+                Router.delete('/', VoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
+            });
         });
     });
 });

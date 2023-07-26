@@ -16,7 +16,6 @@
 
 import { PrismaDTO, prisma } from "@core/lib/Prisma.js";
 import { Post } from "@core/entity/Post.js";
-import { Prisma } from "@prisma/client";
 
 export default class PostDAO {
     static async all(args?: PrismaDTO.PostFindManyArgs): Promise<Post[]> {

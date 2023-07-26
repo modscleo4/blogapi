@@ -23,6 +23,7 @@ model User {
   audits       Audit[]
   posts        Post[]
   accessTokens AccessToken[]
+  votes        Vote[]
 
   @@map("users")
 }
@@ -42,6 +43,7 @@ model Audit {
 model Post {
   id        String    @id @db.Uuid
   userId    String    @map("user_id") @db.Uuid
+  parentId  String?   @map("parent_id") @db.Uuid
   title     String    @db.VarChar(255)
   resume    String    @db.VarChar(255)
   content   Json      @db.Json
@@ -49,9 +51,31 @@ model Post {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user     User   @relation(fields: [userId], references: [id])
+  parent   Post?  @relation("PostToPost", fields: [parentId], references: [id])
+  children Post[] @relation("PostToPost")
+  votes    Vote[]
 
   @@map("posts")
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+model Vote {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  postId    String    @map("post_id") @db.Uuid
+  kind      VoteType
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@map("votes")
 }
 
 model AccessToken {

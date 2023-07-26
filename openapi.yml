@@ -83,6 +83,14 @@ paths:
       tags:
         - Post
       summary: Get all posts
+      parameters:
+        - name: fields
+          in: query
+          description: Post's fields
+          required: false
+          schema:
+            type: string
+            example: id,title,resume,content,createdAt,updatedAt,user
       responses:
         '200':
           description: Posts found
@@ -322,6 +330,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/post/{id}/vote:
+    get:
+      tags:
+        - Vote
+      summary: Get the current vote on a post
+      security:
+        - oauth2: []
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vote found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostVote'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post or Vote not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    put:
+      tags:
+        - Vote
+      summary: Vote on a post
+      security:
+        - oauth2: ['vote:posts']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPostVote'
+      responses:
+        '200':
+          description: Post voted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostVote'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    delete:
+      tags:
+        - Vote
+      summary: Delete a post vote by ID
+      security:
+        - oauth2: ['vote:posts']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Vote deleted
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post or Vote not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
 components:
   securitySchemes:
     oauth2:
@@ -332,6 +481,7 @@ components:
           tokenUrl: /oauth/token
           scopes:
             write:posts: Write posts
+            vote:posts: Vote posts
             delete:posts: Delete posts
             write:comments: Write comments
             delete:comments: Delete comments
@@ -437,6 +587,32 @@ components:
           type: string
           description: User's name
           example: My Name
+    Content:
+      type: object
+      properties:
+        time:
+          type: integer
+          description: Content's time
+          example: 1612128000000
+        blocks:
+          type: array
+          description: Content's body
+          example: My post content
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Block's type
+                example: paragraph
+              data:
+                type: object
+                description: Block's data
+                example: { "text": "My post content" }
+        version:
+          type: string
+          description: Content's version
+          example: 2.18.0
     RequestPost:
       type: object
       properties:
@@ -449,9 +625,7 @@ components:
           description: Post's resume
           example: My post resume
         content:
-          type: object
-          description: Post's content
-          example: { "body": "My post content" }
+          $ref: '#/components/schemas/Content'
         imageUrl:
           type: string
           description: Post's image URL
@@ -476,9 +650,7 @@ components:
           description: Post's resume
           example: My post resume
         content:
-          type: object
-          description: Post's content
-          example: { "body": "My post content" }
+          $ref: '#/components/schemas/Content'
         imageUrl:
           type: string
           description: Post's image URL
@@ -501,3 +673,47 @@ components:
               type: string
               description: User's username
               example: myusername
+        votes:
+          type: object
+          description: Post's votes by kind
+          properties:
+            [key]:
+              type: integer
+              description: Vote's count
+              example: 1
+    RequestPostVote:
+      type: object
+      properties:
+        kind:
+          type: string
+          description: Vote kind
+          example: UPVOTE
+    PostVote:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Vote's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        postId:
+          type: string
+          description: Post's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          description: User's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        kind:
+          type: string
+          description: Vote kind
+          example: UPVOTE
+        createdAt:
+          type: string
+          format: date-time
+          description: Post's creation date
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Post's last update date
+          example: "2021-01-01T00:00:00.000Z"

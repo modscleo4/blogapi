@@ -21,14 +21,20 @@ import { Auth } from "midori/auth";
 import { Application } from "midori/app";
 import { AuthServiceProvider } from "midori/providers";
 
-import { Prisma } from "@prisma/client";
+import { PrismaDTO, prisma } from "@core/lib/Prisma.js";
 import PostDAO from "@core/dao/PostDAO.js";
+import { VoteType } from "@prisma/client";
 
 export class List extends Handler {
     async handle(req: Request): Promise<Response> {
-        const data = await PostDAO.all({ include: { user: { select: { username: true } } }, orderBy: { createdAt: 'desc' } });
+        const fields = req.query.get('fields')?.split(',') ?? ['id', 'title', 'resume', 'imageUrl', 'createdAt', 'updatedAt', 'user'];
 
-        return Response.json(data);
+        const posts = await PostDAO.all({
+            select: { id: fields.includes('id'), title: fields.includes('title'), resume: fields.includes('resume'), content: fields.includes('content'), imageUrl: fields.includes('imageUrl'), createdAt: fields.includes('createdAt'), updatedAt: fields.includes('updatedAt'), user: fields.includes('user') ? { select: { username: true } } : false },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return Response.json(posts);
     }
 }
 
@@ -51,7 +57,7 @@ export class Create extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
-        const data: Prisma.PostCreateInput = {
+        const data: PrismaDTO.PostCreateInput = {
             id,
             user: {
                 connect: { id: user.id },
@@ -89,7 +95,17 @@ export class Show extends Handler {
             throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
         }
 
-        return Response.json(post);
+        const votes = (await prisma.vote.groupBy({
+            by: ['kind'],
+            where: {
+                postId: post.id
+            },
+            _count: {
+                kind: true
+            }
+        })).reduce((acc, v) => { acc[v.kind] = v._count.kind; return acc; }, {} as Record<VoteType, number>);
+
+        return Response.json({ ...post, votes });
     }
 }
 

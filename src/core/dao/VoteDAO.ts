@@ -15,25 +15,25 @@
  */
 
 import { PrismaDTO, prisma } from "@core/lib/Prisma.js";
-import { AccessToken } from "@core/entity/AccessToken.js";
+import { Vote } from "@core/entity/Vote.js";
 
-export default class AccessTokenDAO {
-    static async all(args?: PrismaDTO.AccessTokenFindManyArgs): Promise<AccessToken[]> {
-        return await prisma.accessToken.findMany(args);
+export default class VoteDAO {
+    static async all(args?: PrismaDTO.VoteFindManyArgs): Promise<Vote[]> {
+        return await prisma.vote.findMany(args);
     }
 
-    static async create(data: PrismaDTO.AccessTokenCreateInput): Promise<AccessToken> {
-        return await prisma.accessToken.create({
+    static async create(data: PrismaDTO.VoteCreateInput): Promise<Vote> {
+        return await prisma.vote.create({
             data
         });
     }
 
-    static async get(args: PrismaDTO.AccessTokenFindFirstArgs): Promise<AccessToken | null> {
-        return await prisma.accessToken.findFirst(args);
+    static async get(args: PrismaDTO.VoteFindFirstArgs): Promise<Vote | null> {
+        return await prisma.vote.findFirst(args);
     }
 
-    static async save(id: string, data: PrismaDTO.AccessTokenUpdateInput): Promise<AccessToken> {
-        return await prisma.accessToken.update({
+    static async save(id: string, data: PrismaDTO.VoteUpdateInput): Promise<Vote> {
+        return await prisma.vote.update({
             where: {
                 id
             },
@@ -41,8 +41,8 @@ export default class AccessTokenDAO {
         });
     }
 
-    static async delete(id: string): Promise<AccessToken> {
-        return await prisma.accessToken.delete({
+    static async delete(id: string): Promise<Vote> {
+        return await prisma.vote.delete({
             where: {
                 id
             }

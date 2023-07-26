@@ -16,7 +16,6 @@
 
 import { PrismaDTO, prisma } from "@core/lib/Prisma.js";
 import { Audit } from "@core/entity/Audit.js";
-import { Prisma } from "@prisma/client";
 
 export default class AuditDAO {
     static async all(args?: PrismaDTO.AuditFindManyArgs): Promise<Audit[]> {
