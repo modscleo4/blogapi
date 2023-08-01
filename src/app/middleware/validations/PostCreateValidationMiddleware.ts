@@ -34,6 +34,28 @@ export default class PostCreateValidationMiddleware extends ValidationMiddleware
                 type: 'object',
                 required: true,
                 nullable: false,
+                customValidations: [
+                    {
+                        validator: (value: Record<string, unknown>) => {
+                            if (typeof value.blocks !== 'object' || !Array.isArray(value.blocks)) {
+                                return false;
+                            }
+
+                            for (const block of value.blocks) {
+                                if (
+                                    typeof block !== 'object'
+                                    || !block.type || typeof block.type !== 'string'
+                                    || !block.data || typeof block.data !== 'object'
+                                ) {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        },
+                        message: 'Invalid content structure.'
+                    }
+                ],
             },
             imageUrl: {
                 type: 'string',

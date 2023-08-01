@@ -21,26 +21,46 @@ import { Auth } from "midori/auth";
 import { Application } from "midori/app";
 import { AuthServiceProvider } from "midori/providers";
 
-import { prisma } from "@core/lib/Prisma.js";
+import { PrismaDTO, prisma } from "@core/lib/Prisma.js";
 
 import { VoteType } from "@prisma/client";
 
 export class List extends Handler {
     async handle(req: Request): Promise<Response> {
-        const fields = req.query.get('fields')?.split(',') ?? ['id', 'title', 'resume', 'imageUrl', 'createdAt', 'updatedAt'];
-        const username = req.query.get('username');
+        const postId = req.params.get('postId');
+        const replyId = req.params.get('id');
 
-        const posts = await prisma.post.findMany({
-            select: { id: fields.includes('id'), title: fields.includes('title'), resume: fields.includes('resume'), content: fields.includes('content'), imageUrl: fields.includes('imageUrl'), createdAt: fields.includes('createdAt'), updatedAt: fields.includes('updatedAt') },
+        if (!postId && !replyId) {
+            throw new HTTPError("Invalid post ID or reply ID.", EStatusCode.BAD_REQUEST);
+        }
+
+        if (postId && !validateUUID(postId)) {
+            throw new HTTPError("Invalid post ID.", EStatusCode.BAD_REQUEST);
+        } else if (replyId && !validateUUID(replyId)) {
+            throw new HTTPError("Invalid reply ID.", EStatusCode.BAD_REQUEST);
+        }
+
+        const replies = await prisma.reply.findMany({
             where: {
-                user: {
-                    username: username || undefined
-                }
+                postId: postId ? postId : undefined,
+                replyId: postId ? null : replyId
+            },
+            include: {
+                replies: {
+                    select: {
+                        id: true,
+                    },
+                    orderBy: {
+                        points: {
+                            value: 'desc'
+                        }
+                    },
+                },
             },
             orderBy: { createdAt: 'desc' }
         });
 
-        return Response.json(posts);
+        return Response.json(replies);
     }
 }
 
@@ -53,9 +73,22 @@ export class Create extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
+    async handle(req: Request<{ content: Record<string, any>; }>): Promise<Response> {
         if (!req.parsedBody) {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
+        }
+
+        const postId = req.params.get('postId');
+        const replyId = req.params.get('replyId');
+
+        if (!postId && !replyId) {
+            throw new HTTPError("Invalid post ID or reply ID.", EStatusCode.BAD_REQUEST);
+        }
+
+        if (postId && !validateUUID(postId)) {
+            throw new HTTPError("Invalid post ID.", EStatusCode.BAD_REQUEST);
+        } else if (replyId && !validateUUID(replyId)) {
+            throw new HTTPError("Invalid reply ID.", EStatusCode.BAD_REQUEST);
         }
 
         const id = generateUUID();
@@ -63,16 +96,19 @@ export class Create extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
-        const saved = await prisma.post.create({
+        const saved = await prisma.reply.create({
             data: {
                 id,
                 user: {
                     connect: { id: user.id },
                 },
-                title: req.parsedBody.title,
-                resume: req.parsedBody.resume,
+                post: {
+                    connect: { id: postId },
+                },
+                parent: replyId ? {
+                    connect: { id: replyId },
+                } : undefined,
                 content: req.parsedBody.content,
-                imageUrl: req.parsedBody.imageUrl
             }
         });
         if (!saved) {
@@ -90,7 +126,7 @@ export class Show extends Handler {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await prisma.post.findFirst({
+        const reply = await prisma.reply.findFirst({
             where: {
                 id
             },
@@ -99,33 +135,25 @@ export class Show extends Handler {
                     select: {
                         id: true,
                     },
-                    where: {
-                        parent: null
-                    },
-                    orderBy: {
-                        points: {
-                            value: 'desc'
-                        }
-                    },
                 }
             }
         });
 
-        if (!post) {
-            throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
+        if (!reply) {
+            throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
-        const votes = (await prisma.postVote.groupBy({
+        const votes = (await prisma.replyVote.groupBy({
             by: ['kind'],
             where: {
-                postId: post.id
+                replyId: reply.id
             },
             _count: {
                 kind: true
             }
         })).reduce((acc, v) => { acc[v.kind] = v._count.kind; return acc; }, {} as Record<VoteType, number>);
 
-        return Response.json({ ...post, votes });
+        return Response.json({ ...reply, votes });
     }
 }
 
@@ -138,20 +166,20 @@ export class Update extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl: string | null; }>): Promise<Response> {
+    async handle(req: Request<{ content: Record<string, any>; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await prisma.post.findFirst({
+        const post = await prisma.reply.findFirst({
             where: {
                 id
             }
         });
 
         if (!post) {
-            throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
+            throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
         // Since the AuthBearer middleware is used, the user is already authenticated
@@ -165,12 +193,9 @@ export class Update extends Handler {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
 
-        post.title = req.parsedBody.title;
-        post.resume = req.parsedBody.resume;
         post.content = req.parsedBody.content;
-        post.imageUrl = req.parsedBody.imageUrl;
 
-        await prisma.post.update({ where: { id: post.id }, data: { title: post.title, resume: post.resume, content: post.content, imageUrl: post.imageUrl } });
+        await prisma.reply.update({ where: { id: post.id }, data: { content: post.content } });
 
         return Response.json(post);
     }
@@ -185,20 +210,20 @@ export class Patch extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title?: string, resume?: string, content?: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
+    async handle(req: Request<{ content?: Record<string, any>; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await prisma.post.findFirst({
+        const post = await prisma.reply.findFirst({
             where: {
                 id
             }
         });
 
         if (!post) {
-            throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
+            throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
         // Since the AuthBearer middleware is used, the user is already authenticated
@@ -212,23 +237,11 @@ export class Patch extends Handler {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
 
-        if (req.parsedBody.title) {
-            post.title = req.parsedBody.title;
-        }
-
-        if (req.parsedBody.resume) {
-            post.resume = req.parsedBody.resume;
-        }
-
         if (req.parsedBody.content) {
             post.content = req.parsedBody.content;
         }
 
-        if (req.parsedBody.imageUrl !== undefined) {
-            post.imageUrl = req.parsedBody.imageUrl;
-        }
-
-        await prisma.post.update({ where: { id: post.id }, data: { title: post.title, resume: post.resume, content: post.content!, imageUrl: post.imageUrl } });
+        await prisma.reply.update({ where: { id: post.id }, data: { content: post.content! } });
 
         return Response.json(post);
     }
@@ -249,14 +262,14 @@ export class Destroy extends Handler {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await prisma.post.findFirst({
+        const post = await prisma.reply.findFirst({
             where: {
                 id
             }
         });
 
         if (!post) {
-            throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
+            throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
         // Since the AuthBearer middleware is used, the user is already authenticated
@@ -266,7 +279,7 @@ export class Destroy extends Handler {
             throw new HTTPError('You are not the owner of this post.', EStatusCode.FORBIDDEN);
         }
 
-        await prisma.post.delete({ where: { id: post.id } });
+        await prisma.reply.delete({ where: { id: post.id } });
 
         return Response.empty();
     }

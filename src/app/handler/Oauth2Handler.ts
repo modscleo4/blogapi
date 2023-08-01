@@ -23,8 +23,8 @@ import { JWT } from "midori/jwt";
 import { Auth } from "midori/auth";
 import { AuthServiceProvider, JWTServiceProvider } from "midori/providers";
 
-import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
-import UserDAO from "@core/dao/UserDAO.js";
+import { prisma } from "@core/lib/Prisma.js";
+
 import AuthBearerService from "@app/services/AuthBearerService.js";
 import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
@@ -56,7 +56,7 @@ export default class Oauth2Handler extends Handler {
         return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }
 
-    async handleRefreshTokenGrant(req: Request<{ grant_type: string, refresh_token: string }>): Promise<Response> {
+    async handleRefreshTokenGrant(req: Request<{ grant_type: string, refresh_token: string; }>): Promise<Response> {
         if (!req.parsedBody?.refresh_token) {
             throw new HTTPError("Invalid request.", EStatusCode.BAD_REQUEST);
         }
@@ -69,13 +69,13 @@ export default class Oauth2Handler extends Handler {
 
         const payload = JSON.parse(jweData.toString()) as Payload;
 
-        const accessToken = await AccessTokenDAO.get({ where: { id: payload.sub } });
+        const accessToken = await prisma.accessToken.findFirst({ where: { id: payload.sub } });
         if (!accessToken || accessToken.revokedAt || (payload.exp && payload.exp < Date.now() / 1000)) {
             console.log(1);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
-        const user = await UserDAO.get({ where: { id: accessToken.userId } });
+        const user = await prisma.user.findFirst({ where: { id: accessToken.userId } });
         if (!user) {
             console.log(2);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
@@ -83,7 +83,7 @@ export default class Oauth2Handler extends Handler {
 
         const tokenInfo = await this.#authBearer.generateToken(user, accessToken.scope, req);
 
-        await AccessTokenDAO.save(payload.sub!, { revokedAt: new Date() });
+        await prisma.accessToken.update({ where: { id: payload.sub! }, data: { revokedAt: new Date() } });
 
         return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }

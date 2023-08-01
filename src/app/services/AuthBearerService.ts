@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { prisma } from "@core/lib/Prisma.js";
 import { Application } from "midori/app";
 import { User } from "midori/auth";
 import { Request } from "midori/http";
@@ -21,8 +22,6 @@ import { JWT } from "midori/jwt";
 import { JWTServiceProvider } from "midori/providers";
 import { Payload as JWTPayload } from "midori/util/jwt.js";
 import { generateUUID } from "midori/util/uuid.js";
-
-import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
 
 export default class AuthBearerService {
     #jwt: JWT;
@@ -50,7 +49,15 @@ export default class AuthBearerService {
         const access_token = this.#jwt.sign(data);
         const refresh_token = this.#jwt.encrypt(Buffer.from(JSON.stringify(<JWTPayload> { jti: generateUUID(), sub: data.jti })), 'JWT');
 
-        await AccessTokenDAO.create({ id: data.jti!, user: { connect: { id: user.id } }, scope, expiresAt: new Date(issuedAt + expires), userIP: req.ip });
+        await prisma.accessToken.create({
+            data: {
+                id: data.jti!,
+                user: { connect: { id: user.id } },
+                scope,
+                expiresAt: new Date(issuedAt + expires),
+                userIP: req.ip
+            }
+        });
 
         return {
             token_type: 'Bearer',

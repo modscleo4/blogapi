@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   description: "Backend API for Blogs project."
   version: 1.0.0
@@ -31,7 +31,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/AuthUser'
         '400':
           description: Invalid request
           content:
@@ -65,6 +65,37 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/AuthUser'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/user/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          description: User's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/User'
         '401':
           description: Unauthorized
@@ -90,7 +121,14 @@ paths:
           required: false
           schema:
             type: string
-            example: id,title,resume,content,createdAt,updatedAt,user
+            example: id,title,resume,content,createdAt,updatedAt
+        - name: username
+          in: query
+          description: Post's author username
+          required: false
+          schema:
+            type: string
+            example: myusername
       responses:
         '200':
           description: Posts found
@@ -99,7 +137,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Post'
+                  $ref: '#/components/schemas/PostList'
         '500':
           description: Internal server error
           content:
@@ -330,6 +368,297 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/post/{postId}/reply:
+    post:
+      tags:
+        - Reply
+      summary: Reply to a Post
+      security:
+        - oauth2: ['write:replies']
+      parameters:
+        - name: postId
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReply'
+      responses:
+        '201':
+          description: Reply created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/reply/{replyid}/reply:
+    post:
+      tags:
+        - Reply
+      summary: Reply to a Reply
+      security:
+        - oauth2: ['write:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Parent Reply's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReply'
+      responses:
+        '201':
+          description: Reply created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/reply/{id}:
+    get:
+      tags:
+        - Reply
+      summary: Get a reply by ID
+      parameters:
+        - name: id
+          in: path
+          description: Reply's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reply found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '404':
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    put:
+      tags:
+        - Reply
+      summary: Update a reply by ID
+      security:
+        - oauth2: ['write:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Reply's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReply'
+      responses:
+        '200':
+          description: Reply updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    patch:
+      tags:
+        - Reply
+      summary: Partially update a reply by ID
+      security:
+        - oauth2: ['write:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Reply's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReply'
+      responses:
+        '200':
+          description: Reply updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reply'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    delete:
+      tags:
+        - Reply
+      summary: Delete a reply by ID
+      security:
+        - oauth2: ['delete:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Reply's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Reply deleted
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/post/{id}/vote:
     get:
       tags:
@@ -471,6 +800,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/reply/{id}/vote:
+    get:
+      tags:
+        - Vote
+      summary: Get the current vote on a reply
+      security:
+        - oauth2: []
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vote found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostVote'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post or Vote not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    put:
+      tags:
+        - Vote
+      summary: Vote on a reply
+      security:
+        - oauth2: ['vote:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestPostVote'
+      responses:
+        '200':
+          description: Post voted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostVote'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    delete:
+      tags:
+        - Vote
+      summary: Delete a reply vote by ID
+      security:
+        - oauth2: ['vote:replies']
+      parameters:
+        - name: id
+          in: path
+          description: Post's ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Vote deleted
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationErrorResponse'
+                  - $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Post or Vote not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
 components:
   securitySchemes:
     oauth2:
@@ -483,8 +953,9 @@ components:
             write:posts: Write posts
             vote:posts: Vote posts
             delete:posts: Delete posts
-            write:comments: Write comments
-            delete:comments: Delete comments
+            write:replies: Write replies
+            vote:replies: Vote replies
+            delete:replies: Delete replies
   schemas:
     ServerErrorResponse:
       type: object
@@ -537,8 +1008,8 @@ components:
           type: object
           description: Validation errors
           example: { "username": ["This field is required"], "password": ["This field is required"] }
-          properties:
-            [key]:
+          patternProperties:
+            ^[a-zA-Z0-9_]+$:
               type: array
               items:
                 type: string
@@ -568,11 +1039,12 @@ components:
           type: string
           description: User's password
           example: 12345678
-    User:
+    AuthUser:
       type: object
       properties:
         id:
           type: string
+          format: uuid
           description: User's UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         username:
@@ -587,6 +1059,26 @@ components:
           type: string
           description: User's name
           example: My Name
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          description: User's username
+          example: myusername
+        name:
+          type: string
+          description: User's name
+          example: My Name
+        posts:
+          type: integer
+          description: User's posts count
+          example: 1
     Content:
       type: object
       properties:
@@ -597,7 +1089,6 @@ components:
         blocks:
           type: array
           description: Content's body
-          example: My post content
           items:
             type: object
             properties:
@@ -630,15 +1121,17 @@ components:
           type: string
           description: Post's image URL
           example: https://example.com/image.png
-    Post:
+    PostList:
       type: object
       properties:
         id:
           type: string
+          format: uuid
           description: Post's UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         userId:
           type: string
+          format: uuid
           description: Post's user UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         title:
@@ -665,19 +1158,115 @@ components:
           format: date-time
           description: Post's last update date
           example: "2021-01-01T00:00:00.000Z"
-        user:
-          type: object
-          description: Post's user
-          properties:
-            username:
-              type: string
-              description: User's username
-              example: myusername
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Post's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          format: uuid
+          description: Post's user UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type: string
+          description: Post's title
+          example: My Post
+        resume:
+          type: string
+          description: Post's resume
+          example: My post resume
+        content:
+          $ref: '#/components/schemas/Content'
+        imageUrl:
+          type: string
+          description: Post's image URL
+          example: https://example.com/image.png
+        createdAt:
+          type: string
+          format: date-time
+          description: Post's creation date
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Post's last update date
+          example: "2021-01-01T00:00:00.000Z"
+        replies:
+          type: array
+          description: Post's replies
+          items:
+            type: string
+            format: uuid
+            description: Reply's UUID
+            example: 123e4567-e89b-12d3-a456-426614174000
         votes:
           type: object
           description: Post's votes by kind
-          properties:
-            [key]:
+          example: { "UPVOTE": 1, "DOWNVOTE": 0 }
+          patternProperties:
+            ^[a-zA-Z0-9_]+$:
+              type: integer
+              description: Vote's count
+              example: 1
+    RequestReply:
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/Content'
+    Reply:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Reply's UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userId:
+          type: string
+          format: uuid
+          description: Reply's user UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        postId:
+          type: string
+          format: uuid
+          description: Reply's post UUID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        replyId:
+          type: string
+          format: uuid
+          description: Reply's parent reply UUID
+          nullable: true
+          example: 123e4567-e89b-12d3-a456-426614174000
+        content:
+          $ref: '#/components/schemas/Content'
+        createdAt:
+          type: string
+          format: date-time
+          description: Reply's creation date
+          example: "2021-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Reply's last update date
+          example: "2021-01-01T00:00:00.000Z"
+        replies:
+          type: array
+          description: Reply's replies
+          items:
+            type: string
+            format: uuid
+            description: Reply's UUID
+            example: 123e4567-e89b-12d3-a456-426614174000
+        votes:
+          type: object
+          description: Reply's votes by kind
+          example: { "UPVOTE": 1, "DOWNVOTE": 0 }
+          patternProperties:
+            ^[a-zA-Z0-9_]+$:
               type: integer
               description: Vote's count
               example: 1
@@ -693,14 +1282,17 @@ components:
       properties:
         id:
           type: string
+          format: uuid
           description: Vote's UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         postId:
           type: string
+          format: uuid
           description: Post's UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         userId:
           type: string
+          format: uuid
           description: User's UUID
           example: 123e4567-e89b-12d3-a456-426614174000
         kind:

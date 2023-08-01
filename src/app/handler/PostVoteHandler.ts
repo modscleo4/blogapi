@@ -16,13 +16,13 @@
 
 import { EStatusCode, Handler, Request, Response } from "midori/http";
 import { HTTPError } from "midori/errors";
-import { generateUUID } from "midori/util/uuid.js";
+import { generateUUID, validateUUID } from "midori/util/uuid.js";
 import { Auth } from "midori/auth";
 import { Application } from "midori/app";
 import { AuthServiceProvider } from "midori/providers";
 
-import PostDAO from "@core/dao/PostDAO.js";
-import VoteDAO from "@core/dao/VoteDAO.js";
+import { prisma } from "@core/lib/Prisma.js";
+
 import { VoteType } from "@prisma/client";
 
 export class Show extends Handler {
@@ -36,11 +36,11 @@ export class Show extends Handler {
 
     async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
-        if (!id || !id.match(/^[0-9a-f]{8}(-[0-9a-f]{4}){4}[0-9a-f]{8}$/i)) {
+        if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await PostDAO.get({
+        const post = await prisma.post.findFirst({
             where: {
                 id
             }
@@ -53,7 +53,7 @@ export class Show extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
-        const vote = await VoteDAO.get({ where: { postId: id, userId: user.id } });
+        const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });
         if (!vote) {
             throw new HTTPError('Vote not found.', EStatusCode.NOT_FOUND);
         }
@@ -73,11 +73,11 @@ export class Update extends Handler {
 
     async handle(req: Request<{ kind: VoteType; }>): Promise<Response> {
         const id = req.params.get('id');
-        if (!id || !id.match(/^[0-9a-f]{8}(-[0-9a-f]{4}){4}[0-9a-f]{8}$/i)) {
+        if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await PostDAO.get({
+        const post = await prisma.post.findFirst({
             where: {
                 id
             }
@@ -90,25 +90,27 @@ export class Update extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
-        const vote = await VoteDAO.get({ where: { postId: id, userId: user.id } });
+        const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });
         if (vote) {
             vote.kind = req.parsedBody?.kind!;
 
-            await VoteDAO.save(vote.id, { kind: vote.kind });
+            await prisma.postVote.update({ where: { id: vote.id }, data: { kind: vote.kind } });
 
             return Response.json(vote);
         } else {
-            const vote = await VoteDAO.create({
-                id: generateUUID(),
-                kind: req.parsedBody?.kind!,
-                user: {
-                    connect: {
-                        id: user.id
-                    }
-                },
-                post: {
-                    connect: {
-                        id: post.id
+            const vote = await prisma.postVote.create({
+                data: {
+                    id: generateUUID(),
+                    kind: req.parsedBody?.kind!,
+                    user: {
+                        connect: {
+                            id: user.id
+                        }
+                    },
+                    post: {
+                        connect: {
+                            id: post.id
+                        }
                     }
                 }
             });
@@ -129,11 +131,11 @@ export class Destroy extends Handler {
 
     async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
-        if (!id || !id.match(/^[0-9a-f]{8}(-[0-9a-f]{4}){4}[0-9a-f]{8}$/i)) {
+        if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
         }
 
-        const post = await PostDAO.get({
+        const post = await prisma.post.findFirst({
             where: {
                 id
             }
@@ -146,12 +148,12 @@ export class Destroy extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
-        const vote = await VoteDAO.get({ where: { postId: id, userId: user.id } });
+        const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });
         if (!vote) {
             throw new HTTPError('Vote not found.', EStatusCode.NOT_FOUND);
         }
 
-        await VoteDAO.delete(vote.id);
+        await prisma.postVote.delete({ where: { id: vote.id } });
 
         return Response.empty();
     }

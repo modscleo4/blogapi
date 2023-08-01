@@ -19,11 +19,9 @@ import { HTTPError } from "midori/errors";
 import { EStatusCode, Handler, Request, Response } from "midori/http";
 import { JWT } from "midori/jwt";
 import { JWTServiceProvider } from "midori/providers";
-import { Payload as JWTPayload } from "midori/util/jwt.js";
 import { generateUUID } from "midori/util/uuid.js";
 
-import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
-import UserDAO from "@core/dao/UserDAO.js";
+import { prisma } from "@core/lib/Prisma.js";
 
 import { Oauth2LoginConfig, Oauth2LoginConfigProvider } from "@app/providers/Oauth2LoginConfigProvider.js";
 import AuthBearerService from "@app/services/AuthBearerService.js";
@@ -105,11 +103,13 @@ export class Callback extends Handler {
 
         const { email, name, preferred_username } = await userinfoRes.json();
 
-        const user = await UserDAO.get({ where: { email } }) ?? await UserDAO.create({
-            id: generateUUID(),
-            username: preferred_username,
-            email,
-            name,
+        const user = await prisma.user.findFirst({ where: { email } }) ?? await prisma.user.create({
+            data: {
+                id: generateUUID(),
+                username: preferred_username,
+                email,
+                name,
+            }
         });
 
         const tokenInfo = await this.#authBearer.generateToken(user, '*', req);

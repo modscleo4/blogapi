@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -22,18 +23,35 @@ model User {
 
   audits       Audit[]
   posts        Post[]
+  replies      Reply[]
   accessTokens AccessToken[]
-  votes        Vote[]
+  postVotes    PostVote[]
+  replyVotes   ReplyVote[]
 
   @@map("users")
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum AuditEntity {
+  USER
+  POST
+  REPLY
+  POST_VOTE
+  REPLY_VOTE
+}
+
 model Audit {
-  id        String    @id @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  action    String    @db.VarChar(255)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
+  id        String      @id @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  action    AuditAction
+  entity    AuditEntity
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime?   @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -43,7 +61,6 @@ model Audit {
 model Post {
   id        String    @id @db.Uuid
   userId    String    @map("user_id") @db.Uuid
-  parentId  String?   @map("parent_id") @db.Uuid
   title     String    @db.VarChar(255)
   resume    String    @db.VarChar(255)
   content   Json      @db.Json
@@ -51,12 +68,31 @@ model Post {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  user     User   @relation(fields: [userId], references: [id])
-  parent   Post?  @relation("PostToPost", fields: [parentId], references: [id])
-  children Post[] @relation("PostToPost")
-  votes    Vote[]
+  user    User        @relation(fields: [userId], references: [id])
+  votes   PostVote[]
+  replies Reply[]
+  points  PostPoints?
 
   @@map("posts")
+}
+
+model Reply {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  postId    String    @map("post_id") @db.Uuid
+  replyId   String?   @map("reply_id") @db.Uuid
+  content   Json      @db.Json
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user    User         @relation(fields: [userId], references: [id])
+  post    Post         @relation(fields: [postId], references: [id])
+  parent  Reply?       @relation("ReplyToReply", fields: [replyId], references: [id])
+  replies Reply[]      @relation("ReplyToReply")
+  votes   ReplyVote[]
+  points  ReplyPoints?
+
+  @@map("replies")
 }
 
 enum VoteType {
@@ -64,7 +100,7 @@ enum VoteType {
   DOWNVOTE
 }
 
-model Vote {
+model PostVote {
   id        String    @id @db.Uuid
   userId    String    @map("user_id") @db.Uuid
   postId    String    @map("post_id") @db.Uuid
@@ -75,7 +111,39 @@ model Vote {
   user User @relation(fields: [userId], references: [id])
   post Post @relation(fields: [postId], references: [id])
 
-  @@map("votes")
+  @@map("post_votes")
+}
+
+model ReplyVote {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  replyId   String    @map("reply_id") @db.Uuid
+  kind      VoteType
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  reply Reply @relation(fields: [replyId], references: [id])
+
+  @@map("reply_votes")
+}
+
+view PostPoints {
+  postId String @unique @map("post_id") @db.Uuid
+  value  BigInt
+
+  post Post @relation(fields: [postId], references: [id])
+
+  @@map("post_points")
+}
+
+view ReplyPoints {
+  replyId String @unique @map("reply_id") @db.Uuid
+  value   BigInt
+
+  reply Reply @relation(fields: [replyId], references: [id])
+
+  @@map("reply_points")
 }
 
 model AccessToken {

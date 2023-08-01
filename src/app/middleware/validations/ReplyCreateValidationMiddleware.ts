@@ -17,19 +17,9 @@
 import { ValidationMiddleware } from "midori/middlewares";
 import { ValidatonRules } from "midori/util/validation.js";
 
-export default class PostUpdateValidationMiddleware extends ValidationMiddleware {
+export default class ReplyCreateValidationMiddleware extends ValidationMiddleware {
     get rules(): ValidatonRules {
         return {
-            title: {
-                type: 'string',
-                required: true,
-                nullable: false,
-            },
-            resume: {
-                type: 'string',
-                required: true,
-                nullable: false,
-            },
             content: {
                 type: 'object',
                 required: true,
@@ -56,11 +46,6 @@ export default class PostUpdateValidationMiddleware extends ValidationMiddleware
                         message: 'Invalid content structure.'
                     }
                 ],
-            },
-            imageUrl: {
-                type: 'string',
-                required: true,
-                nullable: true,
             },
         };
     }

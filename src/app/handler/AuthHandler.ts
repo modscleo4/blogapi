@@ -23,7 +23,8 @@ import { JWT } from "midori/jwt";
 import { AuthServiceProvider, HashServiceProvider, JWTServiceProvider } from "midori/providers";
 import { generateUUID } from "midori/util/uuid.js";
 
-import UserDAO from "@core/dao/UserDAO.js";
+import { prisma } from "@core/lib/Prisma.js";
+
 import ValidationError from "@app/errors/ValidationError.js";
 import AuthBearerService from "@app/services/AuthBearerService.js";
 import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
@@ -42,7 +43,7 @@ export class Register extends Handler {
     }
 
     async handle(req: Request<{ username: string, email: string, name: string, password: string; }>): Promise<Response> {
-        const user = await UserDAO.all({
+        const user = await prisma.user.findMany({
             where: {
                 OR: [
                     { email: req.parsedBody!.email },
@@ -67,12 +68,14 @@ export class Register extends Handler {
 
         const password = this.#hash.hash(req.parsedBody!.password);
 
-        await UserDAO.create({
-            id: generateUUID(),
-            username: req.parsedBody!.username,
-            email: req.parsedBody!.email,
-            name: req.parsedBody!.name,
-            password,
+        await prisma.user.create({
+            data: {
+                id: generateUUID(),
+                username: req.parsedBody!.username,
+                email: req.parsedBody!.email,
+                name: req.parsedBody!.name,
+                password,
+            }
         });
 
         return Response.status(EStatusCode.CREATED);
@@ -89,7 +92,7 @@ export class RequestEmailVerification extends Handler {
     }
 
     async handle(req: Request<{ email: string; }>): Promise<Response> {
-        const user = await UserDAO.get({ where: { email: req.parsedBody!.email } });
+        const user = await prisma.user.findFirst({ where: { email: req.parsedBody!.email } });
         if (!user) {
             throw new HTTPError('User not found', EStatusCode.NOT_FOUND);
         }
@@ -126,7 +129,7 @@ export class VerifyEmail extends Handler {
 
         const payload: EmailVerificationPayload = JSON.parse(decrypted.toString());
 
-        const user = await UserDAO.get({ where: { email: payload.email } });
+        const user = await prisma.user.findFirst({ where: { email: payload.email } });
         if (!user) {
             throw new HTTPError("User not found", EStatusCode.NOT_FOUND);
         }
@@ -135,7 +138,7 @@ export class VerifyEmail extends Handler {
             throw new HTTPError("Email already verified", EStatusCode.BAD_REQUEST);
         }
 
-        await UserDAO.save(user.id, { emailVerifiedAt: new Date() });
+        await prisma.user.update({ where: { id: user.id }, data: { emailVerifiedAt: new Date() } });
 
         return Response.status(EStatusCode.NO_CONTENT);
     }
@@ -154,7 +157,7 @@ export class User extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
-        const user = (await UserDAO.get({ select: { id: true, username: true, email: true, name: true }, where: { id: authUser.id } }))!;
+        const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true }, where: { id: authUser.id } }))!;
 
         return Response.json(user);
     }

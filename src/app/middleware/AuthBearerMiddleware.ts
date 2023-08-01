@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import AccessTokenDAO from "@core/dao/AccessTokenDAO.js";
 import { Request } from "midori/http";
 import { AuthBearerMiddleware as BaseAuthBearerMiddleware } from "midori/middlewares";
 import { Payload } from "midori/util/jwt.js";
+
+import { prisma } from "@core/lib/Prisma.js";
 
 export default class AuthBearerMiddleware extends BaseAuthBearerMiddleware {
     async validateToken(req: Request, payload: Payload): Promise<boolean> {
@@ -25,7 +26,7 @@ export default class AuthBearerMiddleware extends BaseAuthBearerMiddleware {
             return false;
         }
 
-        const access_token = await AccessTokenDAO.get({ where: { id: payload.jti } });
+        const access_token = await prisma.accessToken.findFirst({ where: { id: payload.jti } });
         if (!access_token) {
             return false;
         }

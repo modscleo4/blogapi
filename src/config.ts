@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
 import { Server } from "midori/app";
 import { CORSConfigProviderFactory, ErrorConfigProviderFactory, JWTConfigProviderFactory, RequestConfigProviderFactory, ResponseConfigProviderFactory } from "midori/providers";
+
+import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
 
 export default function config(server: Server): void {
     // Add configs here using `server.configure(ConfigProviderFactory(config))`

@@ -17,7 +17,7 @@
 import { User, UserService } from "midori/auth";
 import { Hash } from "midori/hash";
 
-import UserDAO from "@core/dao/UserDAO.js";
+import { prisma } from "@core/lib/Prisma.js";
 
 export default class PrismaUserService extends UserService {
     #hash: Hash;
@@ -29,11 +29,11 @@ export default class PrismaUserService extends UserService {
     }
 
     async getUserById(id: string): Promise<User | null> {
-        return await UserDAO.get({ select: { id: true, username: true }, where: { id } });
+        return await prisma.user.findFirst({ select: { id: true, username: true }, where: { id } });
     }
 
     async getUserByCredentials(username: string, password: string): Promise<User | null> {
-        const user = await UserDAO.get({ select: { id: true, username: true, password: true }, where: { OR: [{ username }, { email: username }] } });
+        const user = await prisma.user.findFirst({ select: { id: true, username: true, password: true }, where: { OR: [{ username }, { email: username }] } });
 
         if (!user) {
             return null;

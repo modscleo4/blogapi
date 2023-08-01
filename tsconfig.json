@@ -10,6 +10,8 @@
         "pretty": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
         "baseUrl": ".",
         "skipLibCheck": true,
         "paths": {
