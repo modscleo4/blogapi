@@ -17,22 +17,22 @@
 import { ValidationMiddleware } from "midori/middlewares";
 import { ValidatonRules } from "midori/util/validation.js";
 
-export default class AuthRegisterValidationMiddleware extends ValidationMiddleware {
+export default class AuthUserPatchValidationMiddleware extends ValidationMiddleware {
     get rules(): ValidatonRules {
         return {
             username: {
                 type: 'string',
-                required: true,
+                required: false,
                 nullable: false,
             },
             email: {
                 type: 'string',
-                required: true,
+                required: false,
                 nullable: false,
             },
             name: {
                 type: 'string',
-                required: true,
+                required: false,
                 nullable: false,
             },
             bio: {
@@ -42,7 +42,7 @@ export default class AuthRegisterValidationMiddleware extends ValidationMiddlewa
             },
             password: {
                 type: 'string',
-                required: true,
+                required: false,
                 nullable: false,
             },
         };

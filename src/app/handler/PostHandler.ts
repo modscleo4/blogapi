@@ -212,15 +212,15 @@ export class Patch extends Handler {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
 
-        if (req.parsedBody.title) {
+        if (req.parsedBody.title !== undefined) {
             post.title = req.parsedBody.title;
         }
 
-        if (req.parsedBody.resume) {
+        if (req.parsedBody.resume !== undefined) {
             post.resume = req.parsedBody.resume;
         }
 
-        if (req.parsedBody.content) {
+        if (req.parsedBody.content !== undefined) {
             post.content = req.parsedBody.content;
         }
 

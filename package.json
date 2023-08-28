@@ -10,7 +10,7 @@
     "dev": "nodemon --inspect src/server.ts",
     "start": "node .",
     "test": "ts-node-esm src/test/index.ts",
-    "cannon": "npx autocannon -c 500 -d 30 --renderStatusCodes --latency localhost:3000/post",
+    "cannon": "npx autocannon -c 500 -d 30 --renderStatusCodes --latency localhost:3000/api/v1/post",
     "generateKeys": "node ./bin/generateKeys.js"
   },
   "repository": {
@@ -22,19 +22,19 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^18.15.11",
-    "autocannon": "^7.10.0",
-    "nodemon": "^2.0.22",
+    "autocannon": "^7.12.0",
+    "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
-    "ts-patch": "^3.0.1",
+    "ts-patch": "^3.0.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.0.3",
+    "typescript": "^5.2.2",
     "typescript-transform-paths": "^3.4.6"
   },
   "dependencies": {
-    "@prisma/client": "^5.0.0",
-    "dotenv": "^16.0.3",
+    "@prisma/client": "^5.2.0",
+    "dotenv": "^16.3.1",
     "midori": "github:modscleo4/midori",
-    "prisma": "^5.0.0"
+    "prisma": "^5.2.0"
   },
   "engines": {
     "node": ">=18"

@@ -78,6 +78,92 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
+    put:
+      tags:
+        - Auth
+      summary: Update current user
+      security:
+        - oauth2: ['write:profile']
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestUser'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username or email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+    patch:
+      tags:
+        - Auth
+      summary: Partially update current user
+      security:
+        - oauth2: ['write:profile']
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestUser'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username or email already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/user/{id}:
     get:
       tags:
@@ -950,6 +1036,7 @@ components:
         password:
           tokenUrl: /oauth/token
           scopes:
+            write:profile: Write profile
             write:posts: Write posts
             vote:posts: Vote posts
             delete:posts: Delete posts
@@ -1035,6 +1122,10 @@ components:
           type: string
           description: User's name
           example: My Name
+        bio:
+          type: string
+          description: User's bio
+          example: My bio
         password:
           type: string
           description: User's password
@@ -1059,6 +1150,15 @@ components:
           type: string
           description: User's name
           example: My Name
+        bio:
+          type: string
+          description: User's bio
+          example: My bio
+        emailVerifiedAt:
+          type: string
+          format: date-time
+          description: User's email verification date
+          example: "2021-01-01T00:00:00.000Z"
     User:
       type: object
       properties:
@@ -1075,6 +1175,10 @@ components:
           type: string
           description: User's name
           example: My Name
+        bio:
+          type: string
+          description: User's bio
+          example: My bio
         posts:
           type: integer
           description: User's posts count

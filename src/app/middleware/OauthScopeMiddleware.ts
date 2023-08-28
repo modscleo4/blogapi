@@ -24,7 +24,7 @@ export default function OauthScopeMiddlewareFactory(options: { scopes: string[];
             if (req.container.get('::jwt')) {
                 const userScopes = (req.container.get('::jwt').scope ?? '').split(' ');
                 for (const scope of options.scopes) {
-                    if (!userScopes.includes(scope) && !userScopes.includes('*')) {
+                    if (!userScopes.includes(scope)) {
                         throw new HTTPError(`Insufficient permissions: ${scope}`, EStatusCode.FORBIDDEN);
                     }
                 }

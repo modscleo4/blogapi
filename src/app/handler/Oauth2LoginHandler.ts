@@ -89,7 +89,7 @@ export class Callback extends Handler {
             throw new HTTPError('Invalid code', EStatusCode.UNAUTHORIZED);
         }
 
-        const tokenResBody = await tokenRes.json();
+        const tokenResBody: { token_type: string; access_token: string; expires_in: number; } = await tokenRes.json();
 
         const userinfoRes = await fetch(this.#config.userInfoUri, {
             headers: {
@@ -109,6 +109,7 @@ export class Callback extends Handler {
                 username: preferred_username,
                 email,
                 name,
+                emailVerifiedAt: new Date(), // Verified by the OAuth2 provider.
             }
         });
 

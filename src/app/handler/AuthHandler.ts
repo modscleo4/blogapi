@@ -42,7 +42,7 @@ export class Register extends Handler {
         this.#hash = app.services.get(HashServiceProvider);
     }
 
-    async handle(req: Request<{ username: string, email: string, name: string, password: string; }>): Promise<Response> {
+    async handle(req: Request<{ username: string, email: string, name: string, bio?: string | null, password: string; }>): Promise<Response> {
         const user = await prisma.user.findMany({
             where: {
                 OR: [
@@ -74,6 +74,7 @@ export class Register extends Handler {
                 username: req.parsedBody!.username,
                 email: req.parsedBody!.email,
                 name: req.parsedBody!.name,
+                bio: req.parsedBody!.bio,
                 password,
             }
         });
@@ -144,7 +145,7 @@ export class VerifyEmail extends Handler {
     }
 }
 
-export class User extends Handler {
+export class ShowUser extends Handler {
     #auth: Auth;
 
     constructor(app: Application) {
@@ -157,7 +158,102 @@ export class User extends Handler {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
-        const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true }, where: { id: authUser.id } }))!;
+        const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
+
+        return Response.json(user);
+    }
+}
+
+export class UpdateUser extends Handler {
+    #auth: Auth;
+    #hash: Hash;
+
+    constructor(app: Application) {
+        super(app);
+
+        this.#auth = app.services.get(AuthServiceProvider);
+        this.#hash = app.services.get(HashServiceProvider);
+    }
+
+    async handle(req: Request<{ username: string; name: string; bio: string | null; email: string; password: string; }>): Promise<Response> {
+        // Since the AuthBearer middleware is used, the user is already authenticated
+        const authUser = this.#auth.user(req)!;
+
+        const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, bio: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
+
+        const password = this.#hash.hash(req.parsedBody!.password);
+
+        if (!req.parsedBody) {
+            throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
+        }
+
+        user.username = req.parsedBody.username;
+        user.email = req.parsedBody.email;
+        user.name = req.parsedBody.name;
+        user.bio = req.parsedBody.bio;
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                username: user.username,
+                email: user.email,
+                name: user.name,
+                bio: user.bio,
+                password: password,
+            }
+        });
+
+        return Response.json({ id: user.id, username: user.username, email: user.email, name: user.name, bio: user.bio, emailVerifiedAt: user.emailVerifiedAt });
+    }
+}
+
+export class PatchUser extends Handler {
+    #auth: Auth;
+    #hash: Hash;
+
+    constructor(app: Application) {
+        super(app);
+
+        this.#auth = app.services.get(AuthServiceProvider);
+        this.#hash = app.services.get(HashServiceProvider);
+    }
+
+    async handle(req: Request<{ username?: string; name?: string; bio?: string | null; email?: string; password?: string; }>): Promise<Response> {
+        // Since the AuthBearer middleware is used, the user is already authenticated
+        const authUser = this.#auth.user(req)!;
+
+        const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, bio: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
+
+        if (!req.parsedBody) {
+            throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
+        }
+
+        if (req.parsedBody.username !== undefined) {
+            user.username = req.parsedBody!.username;
+        }
+
+        if (req.parsedBody.email !== undefined) {
+            user.email = req.parsedBody!.email;
+        }
+
+        if (req.parsedBody.name !== undefined) {
+            user.name = req.parsedBody!.name;
+        }
+
+        if (req.parsedBody.bio !== undefined) {
+            user.bio = req.parsedBody!.bio;
+        }
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                username: user.username,
+                email: user.email,
+                name: user.name,
+                bio: user.bio,
+                ...(req.parsedBody.password ? { password: this.#hash.hash(req.parsedBody.password) } : {}),
+            }
+        });
 
         return Response.json(user);
     }

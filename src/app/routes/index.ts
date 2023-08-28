@@ -36,11 +36,15 @@ import ReplyCreateValidationMiddleware from "@app/middleware/validations/ReplyCr
 import ReplyPatchValidationMiddleware from "@app/middleware/validations/ReplyPatchValidationMiddleware.js";
 import ReplyUpdateValidationMiddleware from "@app/middleware/validations/ReplyUpdateValidationMiddleware.js";
 import AuthRegisterValidationMiddleware from "@app/middleware/validations/AuthRegisterValidationMiddleware.js";
+import AuthUserUpdateValidationMiddleware from "@app/middleware/validations/AuthUserUpdateValidationMiddleware.js";
+import AuthUserPatchValidationMiddleware from "@app/middleware/validations/AuthUserPatchValidationMiddleware.js";
 import VoteValidationMiddleware from "@app/middleware/validations/VoteValidationMiddleware.js";
 
 import OauthScopeMiddlewareFactory from "@app/middleware/OauthScopeMiddleware.js";
 
 import addSwaggerRoutes from "@swagger-ui/swagger.router.js";
+
+const OauthScopeWriteProfileMiddleware = OauthScopeMiddlewareFactory({ scopes: ['write:profile'] });
 
 const OauthScopeWritePostsMiddleware = OauthScopeMiddlewareFactory({ scopes: ['write:posts'] });
 const OauthScopeVotePostsMiddleware = OauthScopeMiddlewareFactory({ scopes: ['vote:posts'] });
@@ -59,14 +63,24 @@ const Router = new RouterBuilder();
  * Use the Router.get(), Router.post(), Router.put(), Router.patch(), Router.delete() methods to define your routes
  * Use the Router.group() method to group routes under a common prefix
  * Use the Router.route() method to define a route using a custom HTTP method
+ *
+ * You can add an parameter to the path by using the {parameterName} syntax. The parameter will be available in the params property of the Request.
+ *
+ * Example:
+ * Router.get('/user/{id}', UserHandler.Show).withName('user.show');
  */
 
 addSwaggerRoutes(Router);
 Router.get('/', async () => Response.redirect('/docs')).withName('home');
 
-Router.post('/auth/register', AuthHandler.Register, [AuthRegisterValidationMiddleware]).withName('auth.register');
-Router.get('/auth/verify', AuthHandler.VerifyEmail).withName('auth.verify');
-Router.get('/auth/user', AuthHandler.User, [AuthBearerMiddleware]).withName('auth.user');
+Router.group('/auth', () => {
+    Router.post('/register', AuthHandler.Register, [AuthRegisterValidationMiddleware]).withName('auth.register');
+    Router.get('/verify', AuthHandler.VerifyEmail, [AuthBearerMiddleware]).withName('auth.verify');
+
+    Router.get('/user', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
+    Router.put('/user', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
+    Router.patch('/user', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
+});
 
 Router.post('/oauth/token', Oauth2Handler).withName('oauth.token');
 Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
@@ -90,7 +104,7 @@ Router.group('/api/v1', () => {
             Router.delete('/', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
 
             Router.group('/vote', () => {
-                Router.get('/', PostVoteHandler.Show, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.show');
+                Router.get('/', PostVoteHandler.Show, [AuthBearerMiddleware]).withName('post.vote.show');
                 Router.put('/', PostVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware, VoteValidationMiddleware]).withName('post.vote.update');
                 Router.delete('/', PostVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
             });
@@ -107,7 +121,7 @@ Router.group('/api/v1', () => {
             Router.delete('/', ReplyHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeleteRepliesMiddleware]).withName('reply.destroy');
 
             Router.group('/vote', () => {
-                Router.get('/', ReplyVoteHandler.Show, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.show');
+                Router.get('/', ReplyVoteHandler.Show, [AuthBearerMiddleware]).withName('reply.vote.show');
                 Router.put('/', ReplyVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware, VoteValidationMiddleware]).withName('reply.vote.update');
                 Router.delete('/', ReplyVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.destroy');
             });

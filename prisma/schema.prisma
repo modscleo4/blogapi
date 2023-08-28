@@ -16,6 +16,7 @@ model User {
   username        String    @unique @db.VarChar(255)
   email           String    @unique @db.VarChar(255)
   name            String    @db.VarChar(255)
+  bio             String?   @db.Text
   password        String?   @db.VarChar(255)
   emailVerifiedAt DateTime? @map("email_verified_at")
   createdAt       DateTime  @default(now()) @map("created_at")

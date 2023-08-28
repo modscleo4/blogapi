@@ -17,7 +17,6 @@
 import { EStatusCode, Handler, Request, Response } from "midori/http";
 import { HTTPError } from "midori/errors";
 import { Payload } from "midori/util/jwt.js";
-import { generateUUID } from "midori/util/uuid.js";
 import { Application } from "midori/app";
 import { JWT } from "midori/jwt";
 import { Auth } from "midori/auth";

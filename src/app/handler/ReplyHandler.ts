@@ -237,7 +237,7 @@ export class Patch extends Handler {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
 
-        if (req.parsedBody.content) {
+        if (req.parsedBody.content !== undefined) {
             post.content = req.parsedBody.content;
         }
 

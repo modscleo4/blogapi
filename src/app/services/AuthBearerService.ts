@@ -23,6 +23,9 @@ import { JWTServiceProvider } from "midori/providers";
 import { Payload as JWTPayload } from "midori/util/jwt.js";
 import { generateUUID } from "midori/util/uuid.js";
 
+const allScopes        = ['write:profile', 'write:posts', 'vote:posts', 'delete:posts', 'write:replies', 'vote:replies', 'delete:replies'];
+const restrictedScopes = ['write:posts', 'vote:posts', 'delete:posts', 'write:replies', 'vote:replies', 'delete:replies'];
+
 export default class AuthBearerService {
     #jwt: JWT;
 
@@ -33,6 +36,23 @@ export default class AuthBearerService {
     async generateToken(user: User, scope: string, req: Request): Promise<{ token_type: 'Bearer'; access_token: string; refresh_token: string; expires_in: number; scope: string; }> {
         const issuedAt = Date.now();
         const expires = 1000 * 60 * 10; // 10 minutes
+
+        scope = scope.trim();
+
+        if (scope === '*') {
+            scope = allScopes.join(' ');
+        }
+
+        const prismaUser = await prisma.user.findUniqueOrThrow({
+            where: { id: user.id },
+        });
+
+        if (!prismaUser.emailVerifiedAt) {
+            // Do not allow access to unverified users.
+            scope = scope.split(' ').filter(s => !restrictedScopes.includes(s)).join(' ');
+        }
+
+        scope = scope.split(' ').filter(s => allScopes.includes(s)).join(' ');
 
         const data: (JWTPayload & { username: string; scope: string; }) = {
             iss: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
