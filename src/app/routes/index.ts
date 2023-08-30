@@ -88,6 +88,10 @@ Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.call
 
 Router.group('/api/v1', () => {
     Router.group('/user', () => {
+        Router.group('/@{username}', () => {
+            Router.get('/', UserHandler.ShowByUsername).withName('user.showByUsername');
+        });
+
         Router.group('/{id}', () => {
             Router.get('/', UserHandler.Show).withName('user.show');
         });

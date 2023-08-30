@@ -40,3 +40,22 @@ export class Show extends Handler {
         return Response.json({ id: user.id, username: user.username, name: user.name, bio: user.bio, posts: user._count.posts });
     }
 }
+export class ShowByUsername extends Handler {
+    constructor(app: Application) {
+        super(app);
+    }
+
+    async handle(req: Request): Promise<Response> {
+        const username = req.params.get('username');
+        if (!username) {
+            throw new HTTPError("Invalid username.", EStatusCode.BAD_REQUEST);
+        }
+
+        const user = (await prisma.user.findFirst({ select: { id: true, username: true, name: true, bio: true, _count: { select: { posts: true } } }, where: { username } }))!;
+        if (!user) {
+            throw new HTTPError("User not found.", EStatusCode.NOT_FOUND);
+        }
+
+        return Response.json({ id: user.id, username: user.username, name: user.name, bio: user.bio, posts: user._count.posts });
+    }
+}
