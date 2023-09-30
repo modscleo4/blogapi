@@ -16,12 +16,12 @@
 
 import { Application, ServiceProvider } from "midori/app";
 
-import AuthBearerService from "@app/services/AuthBearerService.js";
+import SMTPService from "@app/services/SMTPService.js";
 
-export default class AuthBearerServiceProvider extends ServiceProvider<AuthBearerService> {
-    static service: string = 'blogapi::Auth::Bearer';
+export default class SMTPServiceProvider extends ServiceProvider<SMTPService> {
+    static service: string = 'blogapi::SMTP';
 
-    register(app: Application): AuthBearerService {
-        return new AuthBearerService(app);
+    register(app: Application): SMTPService {
+        return new SMTPService(app);
     }
 }

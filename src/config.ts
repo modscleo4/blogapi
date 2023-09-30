@@ -18,6 +18,8 @@ import { Server } from "midori/app";
 import { CORSConfigProviderFactory, ErrorConfigProviderFactory, JWTConfigProviderFactory, RequestConfigProviderFactory, ResponseConfigProviderFactory } from "midori/providers";
 
 import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
+import SMTPConfigProviderFactory from "@app/providers/SMTPConfigProvider.js";
+import BlogsConfigProviderFactory from "@app/providers/BlogsConfigProvider.js";
 
 export default function config(server: Server): void {
     // Add configs here using `server.configure(ConfigProviderFactory(config))`
@@ -69,4 +71,19 @@ export default function config(server: Server): void {
         tokenUri: process.env.OAUTH2_TOKEN_URI!,
         userInfoUri: process.env.OAUTH2_USERINFO_URI!
     }));
+
+    server.configure(SMTPConfigProviderFactory({
+        host: process.env.SMTP_HOST!,
+        port: Number(process.env.SMTP_PORT || 587),
+        secure: process.env.SMTP_SECURE?.toUpperCase() !== 'FALSE',
+        from: process.env.SMTP_FROM!,
+        auth: process.env.SMTP_USER && {
+            user: process.env.SMTP_USER!,
+            pass: process.env.SMTP_PASSWORD
+        } || undefined,
+    }));
+
+    server.configure(BlogsConfigProviderFactory({
+        url: process.env.BLOGS_URL!,
+    }))
 }

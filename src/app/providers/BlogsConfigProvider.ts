@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-import { Application, ServiceProvider } from "midori/app";
+import { Application, ConfigProvider } from "midori/app";
+import { Constructor } from "midori/util/types.js";
 
-import AuthBearerService from "@app/services/AuthBearerService.js";
+export type BlogsConfig = {
+    url: string;
+};
 
-export default class AuthBearerServiceProvider extends ServiceProvider<AuthBearerService> {
-    static service: string = 'blogapi::Auth::Bearer';
+export abstract class BlogsConfigProvider extends ConfigProvider<BlogsConfig> {
+    static config: string = 'blogapi::Blog';
+}
 
-    register(app: Application): AuthBearerService {
-        return new AuthBearerService(app);
-    }
+export default function BlogsConfigProviderFactory(config: BlogsConfig): Constructor<BlogsConfigProvider> & { [K in keyof typeof BlogsConfigProvider]: typeof BlogsConfigProvider[K] } {
+    return class extends BlogsConfigProvider {
+        register(app: Application): BlogsConfig {
+            return config;
+        }
+    };
 }

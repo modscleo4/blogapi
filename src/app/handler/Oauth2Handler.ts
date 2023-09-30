@@ -27,7 +27,25 @@ import { prisma } from "@core/lib/Prisma.js";
 import AuthBearerService from "@app/services/AuthBearerService.js";
 import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
 
-export default class Oauth2Handler extends Handler {
+export class ListKeys extends Handler {
+    #jwt: JWT;
+
+    constructor(app: Application) {
+        super(app);
+
+        this.#jwt = app.services.get(JWTServiceProvider);
+    }
+
+    async handle(req: Request): Promise<Response> {
+        const jwks = this.#jwt.getPublicKeys();
+
+        return Response.json({
+            keys: jwks,
+        });
+    }
+}
+
+export class Token extends Handler {
     #jwt: JWT;
     #auth: Auth;
     #authBearer: AuthBearerService;

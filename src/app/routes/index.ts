@@ -18,7 +18,7 @@ import { Router as RouterBuilder } from "midori/router";
 import { Response } from "midori/http";
 import { CORSMiddleware } from "midori/middlewares";
 
-import Oauth2Handler from "@app/handler/Oauth2Handler.js";
+import * as Oauth2Handler from "@app/handler/Oauth2Handler.js";
 import * as AuthHandler from "@app/handler/AuthHandler.js";
 import * as PostHandler from "@app/handler/PostHandler.js";
 import * as ReplyHandler from "@app/handler/ReplyHandler.js";
@@ -75,14 +75,21 @@ Router.get('/', async () => Response.redirect('/docs')).withName('home');
 
 Router.group('/auth', () => {
     Router.post('/register', AuthHandler.Register, [AuthRegisterValidationMiddleware]).withName('auth.register');
-    Router.get('/verify', AuthHandler.VerifyEmail, [AuthBearerMiddleware]).withName('auth.verify');
 
-    Router.get('/user', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
-    Router.put('/user', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
-    Router.patch('/user', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
+    Router.group('/email', () => {
+        Router.post('/verify', AuthHandler.RequestEmailVerification, [AuthBearerMiddleware]).withName('auth.email.requestVerification');
+        Router.get('/verify', AuthHandler.VerifyEmail).withName('auth.email.verify');
+    });
+
+    Router.group('/user', () => {
+        Router.get('/', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
+        Router.put('/', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
+        Router.patch('/', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
+    });
 });
 
-Router.post('/oauth/token', Oauth2Handler).withName('oauth.token');
+Router.get('/jwks.json', Oauth2Handler.ListKeys).withName('oauth.jwk');
+Router.post('/oauth/token', Oauth2Handler.Token).withName('oauth.token');
 Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');
 

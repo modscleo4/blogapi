@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import { readFileSync } from "fs";
+import Handlebars from "handlebars";
+
 import { Application } from "midori/app";
 import { Auth } from "midori/auth";
 import { HTTPError } from "midori/errors";
@@ -26,11 +29,13 @@ import { generateUUID } from "midori/util/uuid.js";
 import { prisma } from "@core/lib/Prisma.js";
 
 import ValidationError from "@app/errors/ValidationError.js";
-import AuthBearerService from "@app/services/AuthBearerService.js";
-import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
+import SMTPServiceProvider from "@app/providers/SMTPServiceProvider.js";
+import SMTPService from "@app/services/SMTPService.js";
+import { BlogsConfig, BlogsConfigProvider } from "@app/providers/BlogsConfigProvider.js";
 
 type EmailVerificationPayload = {
-    email: string;
+    sub: string;
+    exp?: number;
 };
 
 export class Register extends Handler {
@@ -43,11 +48,15 @@ export class Register extends Handler {
     }
 
     async handle(req: Request<{ username: string, email: string, name: string, bio?: string | null, password: string; }>): Promise<Response> {
+        if (!req.parsedBody) {
+            throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
+        }
+
         const user = await prisma.user.findMany({
             where: {
                 OR: [
-                    { email: req.parsedBody!.email },
-                    { username: req.parsedBody!.username },
+                    { email: req.parsedBody.email },
+                    { username: req.parsedBody.username },
                 ]
             }
         });
@@ -66,15 +75,15 @@ export class Register extends Handler {
             throw new ValidationError(errors, 'Some fields are invalid', EStatusCode.CONFLICT);
         }
 
-        const password = this.#hash.hash(req.parsedBody!.password);
+        const password = this.#hash.hash(req.parsedBody.password);
 
         await prisma.user.create({
             data: {
                 id: generateUUID(),
-                username: req.parsedBody!.username,
-                email: req.parsedBody!.email,
-                name: req.parsedBody!.name,
-                bio: req.parsedBody!.bio,
+                username: req.parsedBody.username,
+                email: req.parsedBody.email,
+                name: req.parsedBody.name,
+                bio: req.parsedBody.bio,
                 password,
             }
         });
@@ -84,27 +93,48 @@ export class Register extends Handler {
 }
 
 export class RequestEmailVerification extends Handler {
+    #auth: Auth;
     #jwt: JWT;
+    #smtp: SMTPService;
+    #blogsConfig: BlogsConfig;
 
     constructor(app: Application) {
         super(app);
 
+        this.#auth = app.services.get(AuthServiceProvider);
         this.#jwt = app.services.get(JWTServiceProvider);
+        this.#smtp = app.services.get(SMTPServiceProvider);
+        this.#blogsConfig = app.config.get(BlogsConfigProvider)!;
     }
 
     async handle(req: Request<{ email: string; }>): Promise<Response> {
-        const user = await prisma.user.findFirst({ where: { email: req.parsedBody!.email } });
-        if (!user) {
-            throw new HTTPError('User not found', EStatusCode.NOT_FOUND);
+        // Since the AuthBearer middleware is used, the user is already authenticated
+        const authUser = this.#auth.user(req)!;
+
+        const user = (await prisma.user.findFirst({ where: { id: authUser.id } }))!;
+        if (user.emailVerifiedAt !== null) {
+            throw new HTTPError('Email already verified', EStatusCode.FORBIDDEN);
         }
 
-        const payload = <EmailVerificationPayload> { email: user.email };
+        const expiresIn = 60 * 60 * 1; // 1 hour
+        const payload = <EmailVerificationPayload> { sub: user.email, exp: Math.floor(Date.now() / 1000) + expiresIn };
         const token = this.#jwt.encrypt(Buffer.from(JSON.stringify(payload)), 'application/json');
 
-        // TODO: Send email
+        const emailFrom = this.#smtp.from;
+        const verifyUrl = `${this.#blogsConfig.url}/email/verify?token=${token}`;
 
-        return Response.json({ token })
-            .withStatus(EStatusCode.CREATED);
+        const template = Handlebars.compile(readFileSync('./src/email/verify.en.hbs', { encoding: 'utf-8' }));
+        const html = template({ name: user.name, verifyUrl, expiresIn: expiresIn / 60 });
+
+        await this.#smtp.transporter.sendMail({
+            from: `Blogs <${emailFrom}>`,
+            to: user.email,
+            subject: 'Verify your email',
+            text: `Click here to verify your email: ${verifyUrl}.\n\nThis link will expire in 1 hour. If you didn't request a verification, please ignore this email.`,
+            html,
+        });
+
+        return Response.status(EStatusCode.CREATED);
     }
 }
 
@@ -130,7 +160,11 @@ export class VerifyEmail extends Handler {
 
         const payload: EmailVerificationPayload = JSON.parse(decrypted.toString());
 
-        const user = await prisma.user.findFirst({ where: { email: payload.email } });
+        if (payload.exp && payload.exp < Date.now() / 1000) {
+            throw new HTTPError("Token expired", EStatusCode.BAD_REQUEST);
+        }
+
+        const user = await prisma.user.findFirst({ where: { email: payload.sub } });
         if (!user) {
             throw new HTTPError("User not found", EStatusCode.NOT_FOUND);
         }
@@ -181,11 +215,11 @@ export class UpdateUser extends Handler {
 
         const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, bio: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
 
-        const password = this.#hash.hash(req.parsedBody!.password);
-
         if (!req.parsedBody) {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
+
+        const password = this.#hash.hash(req.parsedBody.password);
 
         user.username = req.parsedBody.username;
         user.email = req.parsedBody.email;
@@ -229,19 +263,19 @@ export class PatchUser extends Handler {
         }
 
         if (req.parsedBody.username !== undefined) {
-            user.username = req.parsedBody!.username;
+            user.username = req.parsedBody.username;
         }
 
         if (req.parsedBody.email !== undefined) {
-            user.email = req.parsedBody!.email;
+            user.email = req.parsedBody.email;
         }
 
         if (req.parsedBody.name !== undefined) {
-            user.name = req.parsedBody!.name;
+            user.name = req.parsedBody.name;
         }
 
         if (req.parsedBody.bio !== undefined) {
-            user.bio = req.parsedBody!.bio;
+            user.bio = req.parsedBody.bio;
         }
 
         await prisma.user.update({

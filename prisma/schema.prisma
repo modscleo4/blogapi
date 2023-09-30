@@ -51,6 +51,7 @@ model Audit {
   userId    String      @map("user_id") @db.Uuid
   action    AuditAction
   entity    AuditEntity
+  data      Json        @db.Json
   createdAt DateTime    @default(now()) @map("created_at")
   updatedAt DateTime?   @updatedAt @map("updated_at")
 
