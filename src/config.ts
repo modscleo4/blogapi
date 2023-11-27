@@ -59,6 +59,7 @@ export default function config(server: Server): void {
 
     server.configure(ResponseConfigProviderFactory({
         compression: {
+            enabled: false,
             contentTypes: ['*/*']
         }
     }));

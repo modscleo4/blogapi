@@ -64,7 +64,7 @@ export default function pipeline(server: Server): void {
 
     // Add your own pre-processing middlewares here
     //
-    // server.pipe(ResponseCompressionMiddleware);
+    server.pipe(ResponseCompressionMiddleware);
 
     /**
      * Register the router middleware, which will handle all incoming requests

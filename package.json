@@ -28,7 +28,7 @@
     "ts-node": "^10.9.1",
     "ts-patch": "^3.0.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.2",
     "typescript-transform-paths": "^3.4.6"
   },
   "dependencies": {

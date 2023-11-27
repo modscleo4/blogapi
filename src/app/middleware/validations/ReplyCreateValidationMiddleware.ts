@@ -26,7 +26,11 @@ export default class ReplyCreateValidationMiddleware extends ValidationMiddlewar
                 nullable: false,
                 customValidations: [
                     {
-                        validator: (value: Record<string, unknown>) => {
+                        validator: (value: object) => {
+                            if (!value || !('blocks' in value)) {
+                                return false;
+                            }
+
                             if (typeof value.blocks !== 'object' || !Array.isArray(value.blocks)) {
                                 return false;
                             }
