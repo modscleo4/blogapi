@@ -82,9 +82,9 @@ Router.group('/auth', () => {
     });
 
     Router.group('/user', () => {
-        Router.get('/', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
-        Router.put('/', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
-        Router.patch('/', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
+        Router.get('', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
+        Router.put('', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
+        Router.patch('', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
     });
 });
 
@@ -96,28 +96,28 @@ Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.call
 Router.group('/api/v1', () => {
     Router.group('/user', () => {
         Router.group('/@{username}', () => {
-            Router.get('/', UserHandler.ShowByUsername).withName('user.showByUsername');
+            Router.get('', UserHandler.ShowByUsername).withName('user.showByUsername');
         });
 
         Router.group('/{id}', () => {
-            Router.get('/', UserHandler.Show).withName('user.show');
+            Router.get('', UserHandler.Show).withName('user.show');
         });
     });
 
     Router.group('/post', () => {
-        Router.get('/', PostHandler.List).withName('post.list');
-        Router.post('/', PostHandler.Create, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
+        Router.get('', PostHandler.List).withName('post.list');
+        Router.post('', PostHandler.Create, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
 
         Router.group('/{id}', () => {
-            Router.get('/', PostHandler.Show).withName('post.show');
-            Router.put('/', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
-            Router.patch('/', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
-            Router.delete('/', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
+            Router.get('', PostHandler.Show).withName('post.show');
+            Router.put('', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
+            Router.patch('', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
+            Router.delete('', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
 
             Router.group('/vote', () => {
-                Router.get('/', PostVoteHandler.Show, [AuthBearerMiddleware]).withName('post.vote.show');
-                Router.put('/', PostVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware, VoteValidationMiddleware]).withName('post.vote.update');
-                Router.delete('/', PostVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
+                Router.get('', PostVoteHandler.Show, [AuthBearerMiddleware]).withName('post.vote.show');
+                Router.put('', PostVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware, VoteValidationMiddleware]).withName('post.vote.update');
+                Router.delete('', PostVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
             });
         });
 
@@ -126,15 +126,15 @@ Router.group('/api/v1', () => {
 
     Router.group('/reply', () => {
         Router.group('/{id}', () => {
-            Router.get('/', ReplyHandler.Show).withName('reply.show');
-            Router.put('/', ReplyHandler.Update, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyUpdateValidationMiddleware]).withName('reply.update');
-            Router.patch('/', ReplyHandler.Patch, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyPatchValidationMiddleware]).withName('reply.patch');
-            Router.delete('/', ReplyHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeleteRepliesMiddleware]).withName('reply.destroy');
+            Router.get('', ReplyHandler.Show).withName('reply.show');
+            Router.put('', ReplyHandler.Update, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyUpdateValidationMiddleware]).withName('reply.update');
+            Router.patch('', ReplyHandler.Patch, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyPatchValidationMiddleware]).withName('reply.patch');
+            Router.delete('', ReplyHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeleteRepliesMiddleware]).withName('reply.destroy');
 
             Router.group('/vote', () => {
-                Router.get('/', ReplyVoteHandler.Show, [AuthBearerMiddleware]).withName('reply.vote.show');
-                Router.put('/', ReplyVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware, VoteValidationMiddleware]).withName('reply.vote.update');
-                Router.delete('/', ReplyVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.destroy');
+                Router.get('', ReplyVoteHandler.Show, [AuthBearerMiddleware]).withName('reply.vote.show');
+                Router.put('', ReplyVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware, VoteValidationMiddleware]).withName('reply.vote.update');
+                Router.delete('', ReplyVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.destroy');
             });
         });
 
