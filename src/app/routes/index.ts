@@ -60,9 +60,12 @@ const Router = new RouterBuilder();
  * Routing
  *
  * Define your routes here
- * Use the Router.get(), Router.post(), Router.put(), Router.patch(), Router.delete() methods to define your routes
- * Use the Router.group() method to group routes under a common prefix
- * Use the Router.route() method to define a route using a custom HTTP method
+ * Use the Router.get(), Router.post(), Router.put(), Router.patch(), Router.delete() methods to define your routes.
+ * Use the Router.group() method to group routes under a common prefix.
+ * Use the Router.route() method to define a route using a custom HTTP method.
+ *
+ * Beware of trailing slashes! The Dispatcher Middleware will NOT remove nor add trailing slashes to the request path
+ * `GET /foo` and `GET /foo/` are different routes and will be dispatched to different handlers.
  *
  * You can add an parameter to the path by using the {parameterName} syntax. The parameter will be available in the params property of the Request.
  *

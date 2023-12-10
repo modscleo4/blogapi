@@ -21,6 +21,14 @@ import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigPr
 import SMTPConfigProviderFactory from "@app/providers/SMTPConfigProvider.js";
 import BlogsConfigProviderFactory from "@app/providers/BlogsConfigProvider.js";
 
+/**
+ * Configuration Providers
+ *
+ * Define your configuration providers here.
+ * Use the server.configure() method to add configuration providers to the application.
+ * Use the app.config.get() method to recover the configuration in your handlers and/or middleware constructors.
+ */
+
 export default function config(server: Server): void {
     // Add configs here using `server.configure(ConfigProviderFactory(config))`
     // Recover the config with app.config.get(ConfigProvider) in your handlers and middleware constructors

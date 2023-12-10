@@ -32,6 +32,14 @@ import {
     RouterMiddleware
 } from "midori/middlewares";
 
+/**
+ * Pipelining
+ *
+ * Define your pipeline here.
+ * Use the server.pipe() method to add middlewares to the pipeline.
+ * The order here matters, as the middlewares are chained in the same order they are added.
+ */
+
 export default function pipeline(server: Server): void {
     /**
      * Log every request using the Logger Service Provider

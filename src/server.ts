@@ -21,6 +21,7 @@ import { Server } from "midori/app";
 import { prisma } from "@core/lib/Prisma.js";
 
 import config from './config.js';
+import cron from './cron.js';
 import pipeline from "./pipeline.js";
 import providers from "./providers.js";
 
@@ -35,6 +36,7 @@ if (!server.production) {
 config(server);
 providers(server);
 pipeline(server);
+cron(server);
 
 const port = parseInt(process.env.PORT || '3000');
 
