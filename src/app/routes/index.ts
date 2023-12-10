@@ -42,7 +42,7 @@ import VoteValidationMiddleware from "@app/middleware/validations/VoteValidation
 
 import OauthScopeMiddlewareFactory from "@app/middleware/OauthScopeMiddleware.js";
 
-import addSwaggerRoutes from "@swagger-ui/swagger.router.js";
+import { addSwaggerRoutes } from "midori-swaggerui";
 
 const OauthScopeWriteProfileMiddleware = OauthScopeMiddlewareFactory({ scopes: ['write:profile'] });
 

@@ -20,10 +20,7 @@
             ],
             "@core/*": [
                 "./src/core/*"
-            ],
-            "@swagger-ui/*": [
-                "./src/swagger-ui/*"
-            ],
+            ]
         },
         "plugins": [
             {
