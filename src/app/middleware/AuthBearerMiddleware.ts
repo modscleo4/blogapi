@@ -21,7 +21,7 @@ import { Payload } from "midori/util/jwt.js";
 import { prisma } from "@core/lib/Prisma.js";
 
 export default class AuthBearerMiddleware extends BaseAuthBearerMiddleware {
-    async validateToken(req: Request, payload: Payload): Promise<boolean> {
+    override async validateToken(req: Request, payload: Payload): Promise<boolean> {
         if (!await super.validateToken(req, payload)) {
             return false;
         }

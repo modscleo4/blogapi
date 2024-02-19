@@ -15,7 +15,7 @@
  */
 
 import { Server } from "midori/app";
-import { CORSConfigProviderFactory, ErrorConfigProviderFactory, JWTConfigProviderFactory, RequestConfigProviderFactory, ResponseConfigProviderFactory } from "midori/providers";
+import { CompressionAlgorithm, CORSConfigProviderFactory, ErrorConfigProviderFactory, JWTConfigProviderFactory, RequestConfigProviderFactory, ResponseConfigProviderFactory } from "midori/providers";
 
 import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
 import SMTPConfigProviderFactory from "@app/providers/SMTPConfigProvider.js";
@@ -36,7 +36,7 @@ export default function config(server: Server): void {
     server.configure(CORSConfigProviderFactory({
         origin: process.env.CORS_ORIGIN || '*',
         methods: '*',
-        headers: '*',
+        headers: ['Authorization', '*'],
         maxAge: 86400,
         openerPolicy: 'same-origin',
         embedderPolicy: 'unsafe-none'
@@ -57,7 +57,6 @@ export default function config(server: Server): void {
             enc: process.env.JWE_ENCRYPTION || 'A256GCM',
             secret: process.env.JWE_SECRET,
             privateKeyFile: process.env.JWE_PRIVATE_KEY,
-            // ephemeralPrivateKeyFile: process.env.JWE_EPHEMERAL_KEY,
         }
     }));
 
@@ -68,7 +67,12 @@ export default function config(server: Server): void {
     server.configure(ResponseConfigProviderFactory({
         compression: {
             enabled: false,
-            contentTypes: ['*/*']
+            contentTypes: ['*/*'],
+            levels: {
+                [CompressionAlgorithm.BROTLI]: 4,
+                [CompressionAlgorithm.DEFLATE]: 6,
+                [CompressionAlgorithm.GZIP]: 6,
+            }
         }
     }));
 

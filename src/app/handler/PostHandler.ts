@@ -26,7 +26,7 @@ import { prisma } from "@core/lib/Prisma.js";
 import { VoteType } from "@prisma/client";
 
 export class List extends Handler {
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const fields = req.query.get('fields')?.split(',') ?? ['id', 'title', 'resume', 'imageUrl', 'createdAt', 'updatedAt'];
         const username = req.query.get('username');
 
@@ -53,7 +53,7 @@ export class Create extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
+    override async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
         if (!req.parsedBody) {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
@@ -84,7 +84,7 @@ export class Create extends Handler {
 }
 
 export class Show extends Handler {
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -138,7 +138,7 @@ export class Update extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl: string | null; }>): Promise<Response> {
+    override async handle(req: Request<{ title: string, resume: string, content: Record<string, any>, imageUrl: string | null; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -185,7 +185,7 @@ export class Patch extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ title?: string, resume?: string, content?: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
+    override async handle(req: Request<{ title?: string, resume?: string, content?: Record<string, any>, imageUrl?: string | null; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -243,7 +243,7 @@ export class Destroy extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);

@@ -26,7 +26,7 @@ export class Show extends Handler {
         super(app);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -45,7 +45,7 @@ export class ShowByUsername extends Handler {
         super(app);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const username = req.params.get('username');
         if (!username) {
             throw new HTTPError("Invalid username.", EStatusCode.BAD_REQUEST);

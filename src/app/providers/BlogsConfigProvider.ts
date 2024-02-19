@@ -22,12 +22,12 @@ export type BlogsConfig = {
 };
 
 export abstract class BlogsConfigProvider extends ConfigProvider<BlogsConfig> {
-    static config: string = 'blogapi::Blog';
+    static config: symbol = Symbol('blogapi::Blog');
 }
 
 export default function BlogsConfigProviderFactory(config: BlogsConfig): Constructor<BlogsConfigProvider> & { [K in keyof typeof BlogsConfigProvider]: typeof BlogsConfigProvider[K] } {
     return class extends BlogsConfigProvider {
-        register(app: Application): BlogsConfig {
+        override register(app: Application): BlogsConfig {
             return config;
         }
     };

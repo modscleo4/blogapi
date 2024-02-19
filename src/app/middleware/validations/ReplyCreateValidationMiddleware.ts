@@ -18,7 +18,7 @@ import { ValidationMiddleware } from "midori/middlewares";
 import { ValidatonRules } from "midori/util/validation.js";
 
 export default class ReplyCreateValidationMiddleware extends ValidationMiddleware {
-    get rules(): ValidatonRules {
+    override get rules(): ValidatonRules {
         return {
             content: {
                 type: 'object',

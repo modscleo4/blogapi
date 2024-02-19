@@ -18,7 +18,7 @@ import { ValidationMiddleware } from "midori/middlewares";
 import { ValidatonRules } from "midori/util/validation.js";
 
 export default class AuthRegisterValidationMiddleware extends ValidationMiddleware {
-    get rules(): ValidatonRules {
+    override get rules(): ValidatonRules {
         return {
             username: {
                 type: 'string',

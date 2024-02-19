@@ -36,7 +36,7 @@ export class Login extends Handler {
         this.#config = app.config.get(Oauth2LoginConfigProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         if (!this.#config) {
             throw new HTTPError('Oauth2 config not found', EStatusCode.INTERNAL_SERVER_ERROR);
         }
@@ -67,7 +67,7 @@ export class Callback extends Handler {
         this.#authBearer = app.services.get(AuthBearerServiceProvider);
     }
 
-    async handle(req: Request<{ code: string; }>): Promise<Response> {
+    override async handle(req: Request<{ code: string; }>): Promise<Response> {
         if (!this.#config) {
             throw new HTTPError('Oauth2 config not found', EStatusCode.INTERNAL_SERVER_ERROR);
         }
@@ -76,13 +76,13 @@ export class Callback extends Handler {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + btoa(this.#config.clientId + ':' + this.#config.clientSecret)
+                'Authorization': 'Basic ' + Buffer.from(this.#config.clientId + ':' + this.#config.clientSecret, 'utf8').toString('base64')
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code: req.parsedBody!.code,
                 redirect_uri: this.#config.redirectUri,
-            })
+            }),
         });
 
         if (!tokenRes.ok) {

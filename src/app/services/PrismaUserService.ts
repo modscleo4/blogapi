@@ -28,11 +28,11 @@ export default class PrismaUserService extends UserService {
         this.#hash = hash;
     }
 
-    async getUserById(id: string): Promise<User | null> {
+    override async getUserById(id: string): Promise<User | null> {
         return await prisma.user.findFirst({ select: { id: true, username: true }, where: { id } });
     }
 
-    async getUserByCredentials(username: string, password: string): Promise<User | null> {
+    override async getUserByCredentials(username: string, password: string): Promise<User | null> {
         const user = await prisma.user.findFirst({ select: { id: true, username: true, password: true }, where: { OR: [{ username }, { email: username }] } });
 
         if (!user) {

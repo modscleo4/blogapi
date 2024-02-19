@@ -29,12 +29,12 @@ export type SMTPConfig = {
 };
 
 export abstract class SMTPConfigProvider extends ConfigProvider<SMTPConfig> {
-    static config: string = 'blogapi::SMTP';
+    static config: symbol = Symbol('blogapi::SMTP');
 }
 
 export default function SMTPConfigProviderFactory(config: SMTPConfig): Constructor<SMTPConfigProvider> & { [K in keyof typeof SMTPConfigProvider]: typeof SMTPConfigProvider[K] } {
     return class extends SMTPConfigProvider {
-        register(app: Application): SMTPConfig {
+        override register(app: Application): SMTPConfig {
             return config;
         }
     };

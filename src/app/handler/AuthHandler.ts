@@ -19,7 +19,7 @@ import Handlebars from "handlebars";
 
 import { Application } from "midori/app";
 import { Auth } from "midori/auth";
-import { HTTPError } from "midori/errors";
+import { HTTPError, ValidationError } from "midori/errors";
 import { Hash } from "midori/hash";
 import { EStatusCode, Handler, Request, Response } from "midori/http";
 import { JWT } from "midori/jwt";
@@ -28,7 +28,6 @@ import { generateUUID } from "midori/util/uuid.js";
 
 import { prisma } from "@core/lib/Prisma.js";
 
-import ValidationError from "@app/errors/ValidationError.js";
 import SMTPServiceProvider from "@app/providers/SMTPServiceProvider.js";
 import SMTPService from "@app/services/SMTPService.js";
 import { BlogsConfig, BlogsConfigProvider } from "@app/providers/BlogsConfigProvider.js";
@@ -47,7 +46,7 @@ export class Register extends Handler {
         this.#hash = app.services.get(HashServiceProvider);
     }
 
-    async handle(req: Request<{ username: string, email: string, name: string, bio?: string | null, password: string; }>): Promise<Response> {
+    override async handle(req: Request<{ username: string, email: string, name: string, bio?: string | null, password: string; }>): Promise<Response> {
         if (!req.parsedBody) {
             throw new HTTPError("Invalid body.", EStatusCode.BAD_REQUEST);
         }
@@ -107,7 +106,7 @@ export class RequestEmailVerification extends Handler {
         this.#blogsConfig = app.config.get(BlogsConfigProvider)!;
     }
 
-    async handle(req: Request<{ email: string; }>): Promise<Response> {
+    override async handle(req: Request<{ email: string; }>): Promise<Response> {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
@@ -147,7 +146,7 @@ export class VerifyEmail extends Handler {
         this.#jwt = app.services.get(JWTServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const token = req.query.get('token');
         if (!token) {
             throw new HTTPError("Token not provided", EStatusCode.BAD_REQUEST);
@@ -188,7 +187,7 @@ export class ShowUser extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
@@ -209,7 +208,7 @@ export class UpdateUser extends Handler {
         this.#hash = app.services.get(HashServiceProvider);
     }
 
-    async handle(req: Request<{ username: string; name: string; bio: string | null; email: string; password: string; }>): Promise<Response> {
+    override async handle(req: Request<{ username: string; name: string; bio: string | null; email: string; password: string; }>): Promise<Response> {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
@@ -252,7 +251,7 @@ export class PatchUser extends Handler {
         this.#hash = app.services.get(HashServiceProvider);
     }
 
-    async handle(req: Request<{ username?: string; name?: string; bio?: string | null; email?: string; password?: string; }>): Promise<Response> {
+    override async handle(req: Request<{ username?: string; name?: string; bio?: string | null; email?: string; password?: string; }>): Promise<Response> {
         // Since the AuthBearer middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 

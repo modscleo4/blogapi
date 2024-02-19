@@ -19,9 +19,9 @@ import { Application, ServiceProvider } from "midori/app";
 import SMTPService from "@app/services/SMTPService.js";
 
 export default class SMTPServiceProvider extends ServiceProvider<SMTPService> {
-    static service: string = 'blogapi::SMTP';
+    static service: symbol = Symbol('blogapi::SMTP');
 
-    register(app: Application): SMTPService {
+    override register(app: Application): SMTPService {
         return new SMTPService(app);
     }
 }

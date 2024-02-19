@@ -19,9 +19,9 @@ import { Application, ServiceProvider } from "midori/app";
 import AuthBearerService from "@app/services/AuthBearerService.js";
 
 export default class AuthBearerServiceProvider extends ServiceProvider<AuthBearerService> {
-    static service: string = 'blogapi::Auth::Bearer';
+    static service: symbol = Symbol('blogapi::Auth::Bearer');
 
-    register(app: Application): AuthBearerService {
+    override register(app: Application): AuthBearerService {
         return new AuthBearerService(app);
     }
 }

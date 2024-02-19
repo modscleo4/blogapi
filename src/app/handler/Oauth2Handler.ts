@@ -36,7 +36,7 @@ export class ListKeys extends Handler {
         this.#jwt = app.services.get(JWTServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const jwks = this.#jwt.getPublicKeys();
 
         return Response.json({
@@ -80,7 +80,6 @@ export class Token extends Handler {
 
         const jweData = this.#jwt.decrypt(req.parsedBody.refresh_token);
         if (!jweData) {
-            console.log(0);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
@@ -88,13 +87,11 @@ export class Token extends Handler {
 
         const accessToken = await prisma.accessToken.findFirst({ where: { id: payload.sub } });
         if (!accessToken || accessToken.revokedAt || (payload.exp && payload.exp < Date.now() / 1000)) {
-            console.log(1);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
         const user = await prisma.user.findFirst({ where: { id: accessToken.userId } });
         if (!user) {
-            console.log(2);
             throw new HTTPError("Invalid refresh token.", EStatusCode.BAD_REQUEST);
         }
 
@@ -105,7 +102,7 @@ export class Token extends Handler {
         return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
     }
 
-    async handle(req: Request<{ grant_type: string; }>): Promise<Response> {
+    override async handle(req: Request<{ grant_type: string; }>): Promise<Response> {
         if (!req.parsedBody || !req.parsedBody.grant_type) {
             throw new HTTPError("Invalid request.", EStatusCode.UNAUTHORIZED);
         }

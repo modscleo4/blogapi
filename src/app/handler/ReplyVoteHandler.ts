@@ -34,7 +34,7 @@ export class Show extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -71,7 +71,7 @@ export class Update extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request<{ kind: VoteType; }>): Promise<Response> {
+    override async handle(req: Request<{ kind: VoteType; }>): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
@@ -129,7 +129,7 @@ export class Destroy extends Handler {
         this.#auth = app.services.get(AuthServiceProvider);
     }
 
-    async handle(req: Request): Promise<Response> {
+    override async handle(req: Request): Promise<Response> {
         const id = req.params.get('id');
         if (!id || !validateUUID(id)) {
             throw new HTTPError("Invalid ID.", EStatusCode.BAD_REQUEST);
