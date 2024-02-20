@@ -27,7 +27,7 @@ export type Oauth2LoginConfig = {
 };
 
 export abstract class Oauth2LoginConfigProvider extends ConfigProvider<Oauth2LoginConfig> {
-    static config: symbol = Symbol('blogapi::Oauth2::Login');
+    static override config: symbol = Symbol('blogapi::Oauth2::Login');
 }
 
 export default function Oauth2LoginConfigProviderFactory(config: Oauth2LoginConfig): Constructor<Oauth2LoginConfigProvider> & { [K in keyof typeof Oauth2LoginConfigProvider]: typeof Oauth2LoginConfigProvider[K] } {

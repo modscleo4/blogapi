@@ -18,6 +18,7 @@ import { HTTPError } from "midori/errors";
 import { EStatusCode, Middleware, Request, Response } from "midori/http";
 import { Payload } from "midori/util/jwt.js";
 import { Constructor } from "midori/util/types.js";
+
 import AuthBearerMiddleware from "./AuthBearerMiddleware.js";
 
 export default function OauthScopeMiddlewareFactory(options: { scopes: string[]; }): Constructor<Middleware> {

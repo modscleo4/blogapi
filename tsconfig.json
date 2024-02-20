@@ -14,6 +14,10 @@
         "noImplicitAny": true,
         "baseUrl": ".",
         "skipLibCheck": true,
+        "noImplicitOverride": true,
+        "noImplicitThis": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
         "paths": {
             "@app/*": [
                 "./src/app/*"
