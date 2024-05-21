@@ -15,7 +15,14 @@
  */
 
 import { Server } from "midori/app";
-import { CompressionAlgorithm, CORSConfigProviderFactory, ErrorConfigProviderFactory, JWTConfigProviderFactory, RequestConfigProviderFactory, ResponseConfigProviderFactory } from "midori/providers";
+import {
+    CompressionAlgorithm,
+    CORSConfigProviderFactory,
+    ErrorConfigProviderFactory,
+    JWTConfigProviderFactory,
+    RequestConfigProviderFactory,
+    ResponseConfigProviderFactory
+} from "midori/providers";
 
 import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
 import SMTPConfigProviderFactory from "@app/providers/SMTPConfigProvider.js";
@@ -25,7 +32,7 @@ import BlogsConfigProviderFactory from "@app/providers/BlogsConfigProvider.js";
  * Configuration Providers
  *
  * Define your configuration providers here.
- * Use the server.configure() method to add configuration providers to the application.
+ * Use the server.configure() method to add configuration providersto the application.
  * Use the app.config.get() method to recover the configuration in your handlers and/or middleware constructors.
  */
 
@@ -89,7 +96,7 @@ export default function config(server: Server): void {
         host: process.env.SMTP_HOST!,
         port: Number(process.env.SMTP_PORT || 587),
         secure: process.env.SMTP_SECURE?.toUpperCase() !== 'FALSE',
-        from: process.env.SMTP_FROM!,
+        from: `Blogs <${process.env.SMTP_FROM!}>`,
         auth: process.env.SMTP_USER && {
             user: process.env.SMTP_USER!,
             pass: process.env.SMTP_PASSWORD
@@ -98,5 +105,5 @@ export default function config(server: Server): void {
 
     server.configure(BlogsConfigProviderFactory({
         url: process.env.BLOGS_URL!,
-    }))
+    }));
 }

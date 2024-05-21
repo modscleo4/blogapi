@@ -25,6 +25,7 @@ import { EStatusCode, Handler, Request, Response } from "midori/http";
 import { JWT } from "midori/jwt";
 import { AuthServiceProvider, HashServiceProvider, JWTServiceProvider } from "midori/providers";
 import { generateUUID } from "midori/util/uuid.js";
+import { Payload as JWTPayload } from "midori/util/jwt.js";
 
 import { prisma } from "@core/lib/Prisma.js";
 
@@ -32,9 +33,8 @@ import SMTPServiceProvider from "@app/providers/SMTPServiceProvider.js";
 import SMTPService from "@app/services/SMTPService.js";
 import { BlogsConfig, BlogsConfigProvider } from "@app/providers/BlogsConfigProvider.js";
 
-type EmailVerificationPayload = {
+type EmailVerificationPayload = JWTPayload & {
     sub: string;
-    exp?: number;
 };
 
 export class Register extends Handler {
@@ -115,18 +115,35 @@ export class RequestEmailVerification extends Handler {
             throw new HTTPError('Email already verified', EStatusCode.FORBIDDEN);
         }
 
+        const emailVerificationRequest = await prisma.mailVerificationRequest.findFirst({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } });
+        if (emailVerificationRequest) {
+            const createdAt = emailVerificationRequest.createdAt.getTime();
+            const now = new Date().getTime();
+            const diff = now - createdAt;
+
+            if (diff < 5 * 60 * 1000) {
+                throw new HTTPError(`Please wait ${Math.ceil((5 * 60 * 1000 - diff) / 1000)} seconds before requesting a new verification.`, EStatusCode.TOO_MANY_REQUESTS);
+            }
+        }
+
         const expiresIn = 60 * 60 * 1; // 1 hour
-        const payload = <EmailVerificationPayload> { sub: user.email, exp: Math.floor(Date.now() / 1000) + expiresIn };
+        const payload = <EmailVerificationPayload> { jti: generateUUID(), sub: user.email, exp: Math.floor(Date.now() / 1000) + expiresIn };
         const token = this.#jwt.encrypt(Buffer.from(JSON.stringify(payload)), 'application/json');
 
-        const emailFrom = this.#smtp.from;
+        await prisma.mailVerificationRequest.create({
+            data: {
+                id: generateUUID(),
+                userId: user.id,
+            }
+        });
+
         const verifyUrl = `${this.#blogsConfig.url}/email/verify?token=${token}`;
 
         const template = Handlebars.compile(readFileSync('./src/email/verify.en.hbs', { encoding: 'utf-8' }));
         const html = template({ name: user.name, verifyUrl, expiresIn: expiresIn / 60 });
 
         await this.#smtp.transporter.sendMail({
-            from: `Blogs <${emailFrom}>`,
+            from: this.#smtp.from,
             to: user.email,
             subject: 'Verify your email',
             text: `Click here to verify your email: ${verifyUrl}.\n\nThis link will expire in 1 hour. If you didn't request a verification, please ignore this email.`,
@@ -158,6 +175,10 @@ export class VerifyEmail extends Handler {
         }
 
         const payload: EmailVerificationPayload = JSON.parse(decrypted.toString());
+
+        if (!payload.jti || !payload.sub || !payload.exp) {
+            throw new HTTPError("Invalid token", EStatusCode.BAD_REQUEST);
+        }
 
         if (payload.exp && payload.exp < Date.now() / 1000) {
             throw new HTTPError("Token expired", EStatusCode.BAD_REQUEST);

@@ -26,6 +26,7 @@ model User {
   posts        Post[]
   replies      Reply[]
   accessTokens AccessToken[]
+  mailRequests MailVerificationRequest[]
   postVotes    PostVote[]
   replyVotes   ReplyVote[]
 
@@ -161,4 +162,15 @@ model AccessToken {
   user User @relation(fields: [userId], references: [id])
 
   @@map("access_tokens")
+}
+
+model MailVerificationRequest {
+  id        String    @id @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("mail_verification_requests")
 }

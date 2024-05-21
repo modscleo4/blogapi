@@ -91,7 +91,7 @@ Router.group('/auth', () => {
     });
 });
 
-Router.get('/jwks.json', Oauth2Handler.ListKeys).withName('oauth.jwk');
+Router.get('/.well-known/jwks.json', Oauth2Handler.ListKeys).withName('oauth.jwks');
 Router.post('/oauth/token', Oauth2Handler.Token).withName('oauth.token');
 Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');

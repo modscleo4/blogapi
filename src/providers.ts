@@ -26,6 +26,7 @@ import {
     RouterServiceProviderFactory,
     UserServiceProviderFactory
 } from "midori/providers";
+import { Router } from "midori/router";
 
 import PrismaUserService from "@app/services/PrismaUserService.js";
 import router from '@app/routes/index.js';
@@ -41,8 +42,8 @@ import SMTPServiceProvider from "@app/providers/SMTPServiceProvider.js";
  */
 
 export default function providers(server: Server): void {
-    server.install(RouterServiceProviderFactory(router));
-    server.install(LoggerServiceProviderFactory(new ConsoleLogger({ formattingEnabled: true, minLevel: LogLevel.DEBUG })));
+    server.install(RouterServiceProviderFactory(Router.clone(router)));
+    server.install(LoggerServiceProviderFactory(new ConsoleLogger({ formattingEnabled: true, minLevel: server.production ? LogLevel.INFO : LogLevel.DEBUG })));
 
     // Add providers here
     // Recover the provider with app.services.get(ServiceProvider) in your handlers and middleware constructors

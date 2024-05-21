@@ -37,7 +37,8 @@ export class ListKeys extends Handler {
     }
 
     override async handle(req: Request): Promise<Response> {
-        const jwks = this.#jwt.getPublicKeys();
+        // DO NOT send the keys used to encrypt the tokens, only the ones used to verify the signature.
+        const jwks = this.#jwt.getPublicKeys().filter(k => k.use === 'sig');
 
         return Response.json({
             keys: jwks,
@@ -70,7 +71,9 @@ export class Token extends Handler {
 
         const tokenInfo = await this.#authBearer.generateToken(user, req.parsedBody.scope || '*', req);
 
-        return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
+        return Response.json(tokenInfo)
+            .withStatus(EStatusCode.CREATED)
+            .withHeader('Cache-Control', 'no-store');
     }
 
     async handleRefreshTokenGrant(req: Request<{ grant_type: string, refresh_token: string; }>): Promise<Response> {
@@ -99,7 +102,9 @@ export class Token extends Handler {
 
         await prisma.accessToken.update({ where: { id: payload.sub! }, data: { revokedAt: new Date() } });
 
-        return Response.json(tokenInfo).withStatus(EStatusCode.CREATED);
+        return Response.json(tokenInfo)
+            .withStatus(EStatusCode.CREATED)
+            .withHeader('Cache-Control', 'no-store');
     }
 
     override async handle(req: Request<{ grant_type: string; }>): Promise<Response> {
