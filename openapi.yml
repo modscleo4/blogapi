@@ -47,7 +47,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -55,13 +55,13 @@ paths:
         '409':
           description: Username or email already in use
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /auth/user:
@@ -82,13 +82,13 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     put:
@@ -114,25 +114,25 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Username or email already in use
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     patch:
@@ -158,25 +158,25 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Username or email already in use
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/user/{id}:
@@ -202,13 +202,13 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/post:
@@ -244,7 +244,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     post:
@@ -270,7 +270,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -278,13 +278,13 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/post/{id}:
@@ -310,7 +310,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -318,13 +318,13 @@ paths:
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     put:
@@ -357,7 +357,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -365,19 +365,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     patch:
@@ -410,7 +410,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -418,19 +418,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     delete:
@@ -453,7 +453,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -461,19 +461,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/post/{postId}/reply:
@@ -507,7 +507,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -515,19 +515,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/reply/{replyId}/reply:
@@ -561,7 +561,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -569,19 +569,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/reply/{id}:
@@ -607,7 +607,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -615,13 +615,13 @@ paths:
         '404':
           description: Reply not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     put:
@@ -654,7 +654,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -662,19 +662,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Reply not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     patch:
@@ -707,7 +707,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -715,19 +715,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Reply not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     delete:
@@ -750,7 +750,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -758,19 +758,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Reply not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/post/{id}/vote:
@@ -798,7 +798,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -806,19 +806,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post or Vote not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     put:
@@ -851,7 +851,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -859,19 +859,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     delete:
@@ -894,7 +894,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -902,19 +902,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post or Vote not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
   /api/v1/reply/{id}/vote:
@@ -942,7 +942,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -950,19 +950,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post or Vote not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     put:
@@ -995,7 +995,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -1003,19 +1003,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
     delete:
@@ -1038,7 +1038,7 @@ paths:
         '400':
           description: Invalid request
           content:
-            application/json:
+            application/problem+json:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
@@ -1046,19 +1046,19 @@ paths:
         '401':
           description: Unauthorized
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Post or Vote not found
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
-            application/json:
+            application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
 components:
@@ -1078,69 +1078,83 @@ components:
             vote:replies: Vote replies
             delete:replies: Delete replies
   schemas:
-    ServerErrorResponse:
+    ProblemDetailsResponse:
       type: object
       properties:
-        message:
+        type:
           type: string
-          description: Error message
-          example: Internal server error
-        stack:
-          type: array
-          description: Error stack
-          items:
-            type: object
-            properties:
-              method:
-                type: string
-                description: Method name
-                example: AppController.index
-              file:
-                type: string
-                description: File name
-                example: AppController.ts
-              line:
-                type: integer
-                description: Line number
-                example: 10
-              column:
-                type: integer
-                description: Column number
-                example: 10
-    ValidationErrorResponse:
-      type: object
-      properties:
-        message:
+          description: Error type
+          example: about:blank
+        title:
           type: string
-          description: Error message
-          example: Validation failed
-        error:
-          type: string
-          description: Single validation error (if it's not related to a field)
-          example: Invalid body
-    ValidationErrorsResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Error message
-          example: Validation failed
-        errors:
-          type: object
-          description: Validation errors
-          example: { "username": ["This field is required"], "password": ["This field is required"] }
-          patternProperties:
-            ^[a-zA-Z0-9_]+$:
-              type: array
-              items:
-                type: string
-    ErrorResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Error message
+          description: Error title
           example: Invalid request
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+        detail:
+          type: string
+          description: Error detail
+          example: Invalid body
+        instance:
+          type: string
+          description: Error instance
+          example: /auth/register
+    ServerErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetailsResponse'
+        - type: object
+          properties:
+            stack:
+              type: array
+              description: Error stack
+              items:
+                type: object
+                properties:
+                  method:
+                    type: string
+                    description: Method name
+                    example: AppController.index
+                  file:
+                    type: string
+                    description: File name
+                    example: AppController.ts
+                  line:
+                    type: integer
+                    description: Line number
+                    example: 10
+                  column:
+                    type: integer
+                    description: Column number
+                    example: 10
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetailsResponse'
+        - type: object
+          properties:
+            error:
+              type: string
+              description: Single validation error (if it's not related to a field)
+              example: Invalid body
+    ValidationErrorsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetailsResponse'
+        - type: object
+          properties:
+            errors:
+              type: object
+              description: Validation errors
+              example: { "username": ["This field is required"], "password": ["This field is required"] }
+              patternProperties:
+                ^[a-zA-Z0-9_]+$:
+                  type: array
+                  items:
+                    type: string
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetailsResponse'
+        - type: object
     RequestUser:
       type: object
       properties:

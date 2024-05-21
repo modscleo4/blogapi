@@ -38,7 +38,8 @@
     "midori": "github:modscleo4/midori",
     "midori-swaggerui": "github:modscleo4/midori-swaggerui",
     "nodemailer": "^6.9.13",
-    "prisma": "^5.14.0"
+    "prisma": "^5.14.0",
+    "zod": "^3.23.8"
   },
   "engines": {
     "node": ">=18"

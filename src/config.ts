@@ -24,6 +24,8 @@ import {
     ResponseConfigProviderFactory
 } from "midori/providers";
 
+import env from "@core/env.js";
+
 import Oauth2LoginConfigProviderFactory from "@app/providers/Oauth2LoginConfigProvider.js";
 import SMTPConfigProviderFactory from "@app/providers/SMTPConfigProvider.js";
 import BlogsConfigProviderFactory from "@app/providers/BlogsConfigProvider.js";
@@ -41,7 +43,7 @@ export default function config(server: Server): void {
     // Recover the config with app.config.get(ConfigProvider) in your handlers and middleware constructors
 
     server.configure(CORSConfigProviderFactory({
-        origin: process.env.CORS_ORIGIN || '*',
+        origin: env.CORS_ORIGIN || '*',
         methods: '*',
         headers: ['Authorization', '*'],
         maxAge: 86400,
@@ -50,20 +52,20 @@ export default function config(server: Server): void {
     }));
 
     server.configure(ErrorConfigProviderFactory({
-        exposeErrors: process.env.EXPOSE_ERRORS?.toUpperCase() === 'TRUE'
+        exposeErrors: env.EXPOSE_ERRORS || false
     }));
 
     server.configure(JWTConfigProviderFactory({
         sign: {
-            alg: process.env.JWS_ALGORITHM || 'HS256',
-            secret: process.env.JWS_SECRET,
-            privateKeyFile: process.env.JWS_PRIVATE_KEY
+            alg: env.JWS_ALGORITHM || 'HS256',
+            secret: env.JWS_SECRET,
+            privateKeyFile: env.JWS_PRIVATE_KEY
         },
         encrypt: {
-            alg: process.env.JWE_ALGORITHM || 'RSA-OAEP-256',
-            enc: process.env.JWE_ENCRYPTION || 'A256GCM',
-            secret: process.env.JWE_SECRET,
-            privateKeyFile: process.env.JWE_PRIVATE_KEY,
+            alg: env.JWE_ALGORITHM || 'RSA-OAEP-256',
+            enc: env.JWE_ENCRYPTION || 'A256GCM',
+            secret: env.JWE_SECRET,
+            privateKeyFile: env.JWE_PRIVATE_KEY,
         }
     }));
 
@@ -84,26 +86,26 @@ export default function config(server: Server): void {
     }));
 
     server.configure(Oauth2LoginConfigProviderFactory({
-        clientId: process.env.OAUTH2_CLIENT_ID!,
-        clientSecret: process.env.OAUTH2_CLIENT_SECRET!,
-        redirectUri: process.env.OAUTH2_REDIRECT_URI!,
-        authorizationUri: process.env.OAUTH2_AUTHORIZATION_URI!,
-        tokenUri: process.env.OAUTH2_TOKEN_URI!,
-        userInfoUri: process.env.OAUTH2_USERINFO_URI!
+        clientId: env.OAUTH2_CLIENT_ID!,
+        clientSecret: env.OAUTH2_CLIENT_SECRET!,
+        redirectUri: env.OAUTH2_REDIRECT_URI!,
+        authorizationUri: env.OAUTH2_AUTHORIZATION_URI!,
+        tokenUri: env.OAUTH2_TOKEN_URI!,
+        userInfoUri: env.OAUTH2_USERINFO_URI!
     }));
 
     server.configure(SMTPConfigProviderFactory({
-        host: process.env.SMTP_HOST!,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: process.env.SMTP_SECURE?.toUpperCase() !== 'FALSE',
-        from: `Blogs <${process.env.SMTP_FROM!}>`,
-        auth: process.env.SMTP_USER && {
-            user: process.env.SMTP_USER!,
-            pass: process.env.SMTP_PASSWORD
+        host: env.SMTP_HOST!,
+        port: Number(env.SMTP_PORT || 587),
+        secure: env.SMTP_SECURE || true,
+        from: `Blogs <${env.SMTP_FROM!}>`,
+        auth: env.SMTP_USER && {
+            user: env.SMTP_USER,
+            pass: env.SMTP_PASSWORD
         } || undefined,
     }));
 
     server.configure(BlogsConfigProviderFactory({
-        url: process.env.BLOGS_URL!,
+        url: env.BLOGS_URL,
     }));
 }
