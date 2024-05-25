@@ -50,7 +50,7 @@ export class Show extends Handler {
             throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });
@@ -87,7 +87,7 @@ export class Update extends Handler {
             throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });
@@ -145,7 +145,7 @@ export class Destroy extends Handler {
             throw new HTTPError('Post not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         const vote = await prisma.postVote.findFirst({ where: { postId: id, userId: user.id } });

@@ -107,7 +107,7 @@ export class RequestEmailVerification extends Handler {
     }
 
     override async handle(req: Request<{ email: string; }>): Promise<Response> {
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
         const user = (await prisma.user.findFirst({ where: { id: authUser.id } }))!;
@@ -209,7 +209,7 @@ export class ShowUser extends Handler {
     }
 
     override async handle(req: Request): Promise<Response> {
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
         const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
@@ -230,7 +230,7 @@ export class UpdateUser extends Handler {
     }
 
     override async handle(req: Request<{ username: string; name: string; bio: string | null; email: string; password: string; }>): Promise<Response> {
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
         const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, bio: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;
@@ -273,7 +273,7 @@ export class PatchUser extends Handler {
     }
 
     override async handle(req: Request<{ username?: string; name?: string; bio?: string | null; email?: string; password?: string; }>): Promise<Response> {
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const authUser = this.#auth.user(req)!;
 
         const user = (await prisma.user.findFirst({ select: { id: true, username: true, email: true, name: true, bio: true, emailVerifiedAt: true }, where: { id: authUser.id } }))!;

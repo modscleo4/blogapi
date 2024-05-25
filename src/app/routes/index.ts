@@ -16,7 +16,7 @@
 
 import { Router as RouterBuilder } from "midori/router";
 import { Response } from "midori/http";
-import { CORSMiddleware } from "midori/middlewares";
+import { AuthMiddleware, CORSMiddleware } from "midori/middlewares";
 
 import * as Oauth2Handler from "@app/handler/Oauth2Handler.js";
 import * as AuthHandler from "@app/handler/AuthHandler.js";
@@ -80,14 +80,14 @@ Router.group('/auth', () => {
     Router.post('/register', AuthHandler.Register, [AuthRegisterValidationMiddleware]).withName('auth.register');
 
     Router.group('/email', () => {
-        Router.post('/verify', AuthHandler.RequestEmailVerification, [AuthBearerMiddleware]).withName('auth.email.requestVerification');
+        Router.post('/verify', AuthHandler.RequestEmailVerification, [AuthBearerMiddleware, AuthMiddleware]).withName('auth.email.requestVerification');
         Router.get('/verify', AuthHandler.VerifyEmail).withName('auth.email.verify');
     });
 
     Router.group('/user', () => {
-        Router.get('', AuthHandler.ShowUser, [AuthBearerMiddleware]).withName('auth.user.show');
-        Router.put('', AuthHandler.UpdateUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
-        Router.patch('', AuthHandler.PatchUser, [AuthBearerMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
+        Router.get('', AuthHandler.ShowUser, [AuthBearerMiddleware, AuthMiddleware]).withName('auth.user.show');
+        Router.put('', AuthHandler.UpdateUser, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteProfileMiddleware, AuthUserUpdateValidationMiddleware]).withName('auth.user.update');
+        Router.patch('', AuthHandler.PatchUser, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteProfileMiddleware, AuthUserPatchValidationMiddleware]).withName('auth.user.patch');
     });
 });
 
@@ -109,39 +109,39 @@ Router.group('/api/v1', () => {
 
     Router.group('/post', () => {
         Router.get('', PostHandler.List).withName('post.list');
-        Router.post('', PostHandler.Create, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
+        Router.post('', PostHandler.Create, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWritePostsMiddleware, PostCreateValidationMiddleware]).withName('post.create');
 
         Router.group('/{id}', () => {
             Router.get('', PostHandler.Show).withName('post.show');
-            Router.put('', PostHandler.Update, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
-            Router.patch('', PostHandler.Patch, [AuthBearerMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
-            Router.delete('', PostHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
+            Router.put('', PostHandler.Update, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWritePostsMiddleware, PostUpdateValidationMiddleware]).withName('post.update');
+            Router.patch('', PostHandler.Patch, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWritePostsMiddleware, PostPatchValidationMiddleware]).withName('post.patch');
+            Router.delete('', PostHandler.Destroy, [AuthBearerMiddleware, AuthMiddleware, OauthScopeDeletePostsMiddleware]).withName('post.destroy');
 
             Router.group('/vote', () => {
-                Router.get('', PostVoteHandler.Show, [AuthBearerMiddleware]).withName('post.vote.show');
-                Router.put('', PostVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware, VoteValidationMiddleware]).withName('post.vote.update');
-                Router.delete('', PostVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
+                Router.get('', PostVoteHandler.Show, [AuthBearerMiddleware, AuthMiddleware]).withName('post.vote.show');
+                Router.put('', PostVoteHandler.Update, [AuthBearerMiddleware, AuthMiddleware, OauthScopeVotePostsMiddleware, VoteValidationMiddleware]).withName('post.vote.update');
+                Router.delete('', PostVoteHandler.Destroy, [AuthBearerMiddleware, AuthMiddleware, OauthScopeVotePostsMiddleware]).withName('post.vote.destroy');
             });
         });
 
-        Router.post('/{postId}/reply', ReplyHandler.Create, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyCreateValidationMiddleware]).withName('post.reply.create');
+        Router.post('/{postId}/reply', ReplyHandler.Create, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteRepliesMiddleware, ReplyCreateValidationMiddleware]).withName('post.reply.create');
     });
 
     Router.group('/reply', () => {
         Router.group('/{id}', () => {
             Router.get('', ReplyHandler.Show).withName('reply.show');
-            Router.put('', ReplyHandler.Update, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyUpdateValidationMiddleware]).withName('reply.update');
-            Router.patch('', ReplyHandler.Patch, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyPatchValidationMiddleware]).withName('reply.patch');
-            Router.delete('', ReplyHandler.Destroy, [AuthBearerMiddleware, OauthScopeDeleteRepliesMiddleware]).withName('reply.destroy');
+            Router.put('', ReplyHandler.Update, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteRepliesMiddleware, ReplyUpdateValidationMiddleware]).withName('reply.update');
+            Router.patch('', ReplyHandler.Patch, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteRepliesMiddleware, ReplyPatchValidationMiddleware]).withName('reply.patch');
+            Router.delete('', ReplyHandler.Destroy, [AuthBearerMiddleware, AuthMiddleware, OauthScopeDeleteRepliesMiddleware]).withName('reply.destroy');
 
             Router.group('/vote', () => {
-                Router.get('', ReplyVoteHandler.Show, [AuthBearerMiddleware]).withName('reply.vote.show');
-                Router.put('', ReplyVoteHandler.Update, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware, VoteValidationMiddleware]).withName('reply.vote.update');
-                Router.delete('', ReplyVoteHandler.Destroy, [AuthBearerMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.destroy');
+                Router.get('', ReplyVoteHandler.Show, [AuthBearerMiddleware, AuthMiddleware]).withName('reply.vote.show');
+                Router.put('', ReplyVoteHandler.Update, [AuthBearerMiddleware, AuthMiddleware, OauthScopeVoteRepliesMiddleware, VoteValidationMiddleware]).withName('reply.vote.update');
+                Router.delete('', ReplyVoteHandler.Destroy, [AuthBearerMiddleware, AuthMiddleware, OauthScopeVoteRepliesMiddleware]).withName('reply.vote.destroy');
             });
         });
 
-        Router.post('/{replyId}/reply', ReplyHandler.Create, [AuthBearerMiddleware, OauthScopeWriteRepliesMiddleware, ReplyCreateValidationMiddleware]).withName('reply.create');
+        Router.post('/{replyId}/reply', ReplyHandler.Create, [AuthBearerMiddleware, AuthMiddleware, OauthScopeWriteRepliesMiddleware, ReplyCreateValidationMiddleware]).withName('reply.create');
     });
 });
 

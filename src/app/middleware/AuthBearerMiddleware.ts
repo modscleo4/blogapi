@@ -14,35 +14,29 @@
  * limitations under the License.
  */
 
+import { Application } from "midori/app";
 import { Request } from "midori/http";
 import { AuthBearerMiddleware as BaseAuthBearerMiddleware } from "midori/middlewares";
-import { Payload } from "midori/util/jwt.js";
 
 import { prisma } from "@core/lib/Prisma.js";
 
+import AuthBearerService, { AccessToken } from "@app/services/AuthBearerService.js";
+import AuthBearerServiceProvider from "@app/providers/AuthBearerServiceProvider.js";
+
 export default class AuthBearerMiddleware extends BaseAuthBearerMiddleware {
-    override async validateToken(req: Request, payload: Payload): Promise<boolean> {
+    #authBearer: AuthBearerService;
+
+    constructor(app: Application) {
+        super(app);
+
+        this.#authBearer = app.services.get(AuthBearerServiceProvider);
+    }
+
+    override async validateToken(req: Request, payload: AccessToken): Promise<boolean> {
         if (!await super.validateToken(req, payload)) {
             return false;
         }
 
-        const access_token = await prisma.accessToken.findFirst({ where: { id: payload.jti } });
-        if (!access_token) {
-            return false;
-        }
-
-        if (access_token.expiresAt < new Date()) {
-            return false;
-        }
-
-        if (access_token.revokedAt) {
-            return false;
-        }
-
-        if (access_token.userIP && access_token.userIP !== req.ip) {
-            return false;
-        }
-
-        return true;
+        return await this.#authBearer.isAccessTokenValid(payload, req.ip ?? null);
     }
 }

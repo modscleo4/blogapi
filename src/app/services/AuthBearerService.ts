@@ -26,6 +26,8 @@ import { generateUUID } from "midori/util/uuid.js";
 const allScopes        = ['write:profile', 'write:posts', 'vote:posts', 'delete:posts', 'write:replies', 'vote:replies', 'delete:replies'];
 const restrictedScopes = ['write:posts', 'vote:posts', 'delete:posts', 'write:replies', 'vote:replies', 'delete:replies'];
 
+export type AccessToken = JWTPayload & { username: string; scope: string; };
+
 export default class AuthBearerService {
     #jwt: JWT;
 
@@ -54,7 +56,7 @@ export default class AuthBearerService {
 
         scope = scope.split(' ').filter(s => allScopes.includes(s)).join(' ');
 
-        const data: (JWTPayload & { username: string; scope: string; }) = {
+        const data: AccessToken = {
             iss: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
             aud: `${req.headers['x-forwarded-proto'] ?? 'http'}://${req.headers.host}`,
             sub: user.id,
@@ -86,5 +88,84 @@ export default class AuthBearerService {
             expires_in: expires / 1000,
             scope,
         };
+    }
+
+    decodeAccessToken(token: string): AccessToken | null {
+        if (!this.#jwt.verify(token)) {
+            return null;
+        }
+
+        return JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf-8'));
+    }
+
+    decryptRefreshToken(token: string): JWTPayload | null {
+        const jweData = this.#jwt.decrypt(token);
+        if (!jweData) {
+            return null;
+        }
+
+        return JSON.parse(jweData.toString('utf-8'));
+    }
+
+    async revokeAccessToken(token: AccessToken): Promise<void> {
+        await prisma.accessToken.update({
+            where: { id: token.jti },
+            data: { revokedAt: new Date() }
+        });
+    }
+
+    async revokeRefreshToken(token: JWTPayload): Promise<void> {
+        await prisma.accessToken.update({
+            where: { id: token.sub! },
+            data: { revokedAt: new Date() }
+        });
+    }
+
+    async isAccessTokenValid(token: AccessToken, userIP: string | null): Promise<boolean> {
+        const accessToken = await prisma.accessToken.findFirst({
+            where: { id: token.jti }
+        });
+
+        if (!accessToken) {
+            return false;
+        }
+
+        if (accessToken.revokedAt) {
+            return false;
+        }
+
+        if (accessToken.expiresAt < new Date()) {
+            return false;
+        }
+
+        if (userIP && accessToken.userIP && accessToken.userIP !== userIP) {
+            return false;
+        }
+
+        return true;
+    }
+
+    async isRefreshTokenValid(token: JWTPayload, userIP: string | null): Promise<boolean> {
+        const accessToken = await prisma.accessToken.findFirst({
+            where: { id: token.sub! }
+        });
+
+        if (!accessToken) {
+            return false;
+        }
+
+        if (accessToken.revokedAt) {
+            return false;
+        }
+
+        if (token.exp && token.exp < Date.now() / 1000) {
+            return false;
+        }
+
+        if (userIP && accessToken.userIP && accessToken.userIP !== userIP) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -93,7 +93,7 @@ export class Create extends Handler {
 
         const id = generateUUID();
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         const saved = await prisma.reply.create({
@@ -182,7 +182,7 @@ export class Update extends Handler {
             throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         if (post.userId !== user.id) {
@@ -226,7 +226,7 @@ export class Patch extends Handler {
             throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         if (post.userId !== user.id) {
@@ -272,7 +272,7 @@ export class Destroy extends Handler {
             throw new HTTPError('Reply not found.', EStatusCode.NOT_FOUND);
         }
 
-        // Since the AuthBearer middleware is used, the user is already authenticated
+        // Since the Auth middleware is used, the user is already authenticated
         const user = this.#auth.user(req)!;
 
         if (post.userId !== user.id) {
