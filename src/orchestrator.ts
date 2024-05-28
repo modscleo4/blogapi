@@ -29,10 +29,11 @@ if (process.env.NODE_ENV?.toUpperCase() !== 'PRODUCTION') {
 if (cluster.isPrimary) {
     const maxWorkers = process.env.MAX_WORKERS ? parseInt(process.env.MAX_WORKERS) : cpus().length;
     for (let i = 0; i < maxWorkers; i++) {
-        cluster.fork().on('exit', (code, signal) => {
+        cluster.fork().on('exit', function onExit(code, signal) {
             console.error(`Worker ${i} died with code ${code} and signal ${signal}`);
+
             // Try to start a new worker
-            cluster.fork();
+            cluster.fork().on('exit', onExit);
         });
     }
 } else {

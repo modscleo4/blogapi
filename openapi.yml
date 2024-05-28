@@ -18,6 +18,8 @@ tags:
     description: Authentication
   - name: User
     description: Users
+  - name: RSS
+    description: RSS Feeds
   - name: Post
     description: Posts
   - name: Reply
@@ -173,6 +175,83 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/index.rss:
+    get:
+      tags:
+        - RSS
+      summary: Get all posts in RSS format
+      operationId: post.rss
+      responses:
+        '200':
+          description: Posts found
+          content:
+            application/rss+xml:
+              schema:
+                $ref: '#/components/schemas/RSS'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/user/@{username}.rss:
+    get:
+      tags:
+        - RSS
+      summary: Get all posts from a user in RSS format
+      operationId: user.rss
+      parameters:
+        - name: username
+          in: path
+          description: User's username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Posts found
+          content:
+            application/rss+xml:
+              schema:
+                $ref: '#/components/schemas/RSS'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorResponse'
+  /api/v1/user/@{username}:
+    get:
+      tags:
+        - User
+      summary: Get user by username
+      operationId: user.showByUsername
+      parameters:
+        - name: username
+          in: path
+          description: User's username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal server error
           content:
@@ -1157,6 +1236,11 @@ components:
         - type: object
     RequestUser:
       type: object
+      required:
+        - username
+        - email
+        - name
+        - password
       properties:
         username:
           type: string
@@ -1236,6 +1320,10 @@ components:
           example: 1
     Content:
       type: object
+      required:
+        - time
+        - blocks
+        - version
       properties:
         time:
           type: integer
@@ -1246,6 +1334,9 @@ components:
           description: Content's body
           items:
             type: object
+            required:
+              - type
+              - data
             properties:
               type:
                 type: string
@@ -1261,6 +1352,10 @@ components:
           example: 2.18.0
     RequestPost:
       type: object
+      required:
+        - title
+        - resume
+        - content
       properties:
         title:
           type: string
@@ -1371,6 +1466,8 @@ components:
               example: 1
     RequestReply:
       type: object
+      required:
+        - content
       properties:
         content:
           $ref: '#/components/schemas/Content'
@@ -1468,3 +1565,56 @@ components:
           description: Post's last update date
           example: "2021-01-01T00:00:00.000Z"
           nullable: true
+    RSS:
+      type: object
+      xml:
+        name: rss
+      properties:
+        version:
+          type: string
+          description: RSS version
+          example: '2.0'
+          xml:
+            attribute: true
+        channel:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Name of the channel
+              example: My RSS
+            description:
+              type: string
+              description: Phrase or sentence describing the channel.
+              example: My RSS description
+            link:
+              type: string
+              description: The URL to the HTML website corresponding to the channel.
+              example: https://example.com/rss
+            items:
+              type: array
+              description: Channel items
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    description: The title of the item.
+                    example: My Item
+                  description:
+                    type: string
+                    description: The item synopsis.
+                    example: My Item description
+                  link:
+                    type: string
+                    description: The URL of the item.
+                    example: https://example.com/item
+                  guid:
+                    type: string
+                    description: A string that uniquely identifies the item.
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  pubDate:
+                    type: string
+                    format: date-time
+                    description: Indicates when the item was published.
+                    example: "Sat, 07 Sep 2002 00:00:01 GMT"

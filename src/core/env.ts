@@ -53,7 +53,10 @@ const envSchema = z.object({
     SMTP_USER: z.string().optional(),
     SMTP_PASSWORD: z.string().optional(),
 
+    BLOGS_NAME: z.string(),
     BLOGS_URL: z.string(),
+    BLOGS_DESCRIPTION: z.string(),
+    BLOGS_ADMIN_EMAIL: z.string(),
 
     MAX_WORKERS: z.coerce.number().min(1).optional(),
 });

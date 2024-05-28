@@ -48,11 +48,11 @@ export default function config(server: Server): void {
         headers: ['Authorization', '*'],
         maxAge: 86400,
         openerPolicy: 'same-origin',
-        embedderPolicy: 'unsafe-none'
+        embedderPolicy: 'unsafe-none',
     }));
 
     server.configure(ErrorConfigProviderFactory({
-        exposeErrors: env.EXPOSE_ERRORS || false
+        exposeErrors: env.EXPOSE_ERRORS || false,
     }));
 
     server.configure(JWTConfigProviderFactory({
@@ -66,7 +66,7 @@ export default function config(server: Server): void {
             enc: env.JWE_ENCRYPTION || 'A256GCM',
             secret: env.JWE_SECRET,
             privateKeyFile: env.JWE_PRIVATE_KEY,
-        }
+        },
     }));
 
     server.configure(RequestConfigProviderFactory({
@@ -81,8 +81,8 @@ export default function config(server: Server): void {
                 [CompressionAlgorithm.BROTLI]: 4,
                 [CompressionAlgorithm.DEFLATE]: 6,
                 [CompressionAlgorithm.GZIP]: 6,
-            }
-        }
+            },
+        },
     }));
 
     server.configure(Oauth2LoginConfigProviderFactory({
@@ -91,7 +91,7 @@ export default function config(server: Server): void {
         redirectUri: env.OAUTH2_REDIRECT_URI!,
         authorizationUri: env.OAUTH2_AUTHORIZATION_URI!,
         tokenUri: env.OAUTH2_TOKEN_URI!,
-        userInfoUri: env.OAUTH2_USERINFO_URI!
+        userInfoUri: env.OAUTH2_USERINFO_URI!,
     }));
 
     server.configure(SMTPConfigProviderFactory({
@@ -106,6 +106,9 @@ export default function config(server: Server): void {
     }));
 
     server.configure(BlogsConfigProviderFactory({
+        name: env.BLOGS_NAME,
         url: env.BLOGS_URL,
+        description: env.BLOGS_DESCRIPTION,
+        adminEmail: env.BLOGS_ADMIN_EMAIL,
     }));
 }

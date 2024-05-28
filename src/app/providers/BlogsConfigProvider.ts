@@ -18,7 +18,10 @@ import { Application, ConfigProvider } from "midori/app";
 import { Constructor } from "midori/util/types.js";
 
 export type BlogsConfig = {
+    name: string;
     url: string;
+    description: string;
+    adminEmail: string;
 };
 
 export abstract class BlogsConfigProvider extends ConfigProvider<BlogsConfig> {

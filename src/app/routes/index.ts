@@ -22,6 +22,7 @@ import * as Oauth2Handler from "@app/handler/Oauth2Handler.js";
 import * as AuthHandler from "@app/handler/AuthHandler.js";
 import * as PostHandler from "@app/handler/PostHandler.js";
 import * as ReplyHandler from "@app/handler/ReplyHandler.js";
+import * as RSSHandler from "@app/handler/RSSHandler.js";
 import * as UserHandler from "@app/handler/UserHandler.js";
 import * as PostVoteHandler from "@app/handler/PostVoteHandler.js";
 import * as ReplyVoteHandler from "@app/handler/ReplyVoteHandler.js";
@@ -97,8 +98,11 @@ Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');
 
 Router.group('/api/v1', () => {
+    Router.get('/index.rss', RSSHandler.Feed).withName('rss');
+
     Router.group('/user', () => {
         Router.group('/@{username}', () => {
+            Router.get('.rss', RSSHandler.FeedByUser).withName('user.rss');
             Router.get('', UserHandler.ShowByUsername).withName('user.showByUsername');
         });
 
