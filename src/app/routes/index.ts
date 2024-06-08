@@ -97,7 +97,7 @@ Router.post('/oauth/token', Oauth2Handler.Token).withName('oauth.token');
 Router.get('/oauth/login', Oauth2LoginHandler.Login).withName('oauth.login');
 Router.post('/oauth/callback', Oauth2LoginHandler.Callback).withName('oauth.callback');
 
-Router.group('/api/v1', () => {
+Router.group('/v1', () => {
     Router.get('/index.rss', RSSHandler.Feed).withName('rss');
 
     Router.group('/user', () => {

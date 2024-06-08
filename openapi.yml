@@ -11,7 +11,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Development server
-  - url: https://api.blogs.modscleo4.dev.br
+  - url: https://blogs.modscleo4.dev.br/api/
     description: Production server
 tags:
   - name: Auth
@@ -181,7 +181,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/index.rss:
+  /v1/index.rss:
     get:
       tags:
         - RSS
@@ -200,7 +200,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/user/@{username}.rss:
+  /v1/user/@{username}.rss:
     get:
       tags:
         - RSS
@@ -226,7 +226,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/user/@{username}:
+  /v1/user/@{username}:
     get:
       tags:
         - User
@@ -258,7 +258,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/user/{id}:
+  /v1/user/{id}:
     get:
       tags:
         - User
@@ -290,7 +290,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/post:
+  /v1/post:
     get:
       tags:
         - Post
@@ -366,7 +366,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/post/{id}:
+  /v1/post/{id}:
     get:
       tags:
         - Post
@@ -555,7 +555,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/post/{postId}/reply:
+  /v1/post/{postId}/reply:
     post:
       tags:
         - Reply
@@ -609,7 +609,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/reply/{replyId}/reply:
+  /v1/reply/{replyId}/reply:
     post:
       tags:
         - Reply
@@ -663,7 +663,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/reply/{id}:
+  /v1/reply/{id}:
     get:
       tags:
         - Reply
@@ -852,7 +852,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/post/{id}/vote:
+  /v1/post/{id}/vote:
     get:
       tags:
         - Vote
@@ -996,7 +996,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ServerErrorResponse'
-  /api/v1/reply/{id}/vote:
+  /v1/reply/{id}/vote:
     get:
       tags:
         - Vote
@@ -1147,7 +1147,7 @@ components:
       description: OAuth2 password flow
       flows:
         password:
-          tokenUrl: /oauth/token
+          tokenUrl: oauth/token
           scopes:
             write:profile: Write profile
             write:posts: Write posts
